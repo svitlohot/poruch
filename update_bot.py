@@ -3,8 +3,9 @@ import requests
 
 CLIENT_ID = os.getenv('SP_ID')
 CLIENT_SECRET = os.getenv('SP_SECRET')
-# Встав сюди свій contact_id з адресного рядка SendPulse (довгий рядок букв/цифр)
-CONTACT_ID = "69df205225c75c5ed3048310" 
+
+# !!! СЮДИ ВСТАВ СВІЙ CONTACT_ID (довгий рядок літер та цифр із адресного рядка картки контакту)
+CONTACT_ID = "ТВІЙ_CONTACT_ID_З_СЕНДПУЛЬСУ" 
 
 def get_token():
     data = {
@@ -13,10 +14,6 @@ def get_token():
         'client_secret': CLIENT_SECRET
     }
     response = requests.post('https://api.sendpulse.com/oauth/access_token', json=data)
-    
-    # Цей рядок покаже нам в логах Гітхабу реальну помилку від SendPulse
-    print(f"Відповідь сервера авторизації: Status {response.status_code}, Body: {response.text}")
-    
     return response.json().get('access_token')
 
 def get_rates():
@@ -36,14 +33,15 @@ def update_variable(token, var_name, var_value):
             {"name": var_name, "value": var_value}
         ]
     }
-    # Використовуємо залізобетонний метод оновлення змінної для контакту
+    # Оновлений, стандартний метод API для чат-ботів
     url = 'https://api.sendpulse.com/telegram/contacts/set-variable'
     response = requests.post(url, headers=headers, json=payload)
-    print(f"Оновлення контакту: {response.status_code} - {response.text}")
+    print(f"Результат оновлення змінної: {response.status_code} - {response.text}")
 
 token = get_token()
 if token:
     rate_string = get_rates()
+    # Передаємо чисту назву змінної 'exchange_rate'
     update_variable(token, 'exchange_rate', rate_string)
 else:
-    print("Не вдалося отримати токен доступу")
+    print("Не вдалося отримати токен доступу SendPulse")
