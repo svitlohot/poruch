@@ -42,6 +42,6 @@ token = get_token()
 if token:
     rate_string = get_rates()
     # Передаємо чисту назву змінної 'exchange_rate'
-    update_variable(token, 'exchange_rate', rate_string)
+    update_variable(token, 'rate_usd', rate_string)
 else:
     print("Не вдалося отримати токен доступу SendPulse")
