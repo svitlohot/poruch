@@ -3,6 +3,8 @@ import requests
 
 CLIENT_ID = os.getenv('SP_ID')
 CLIENT_SECRET = os.getenv('SP_SECRET')
+# Встав сюди свій contact_id з адресного рядка SendPulse (довгий рядок букв/цифр)
+CONTACT_ID = "69df205225c75c5ed3048310" 
 
 def get_token():
     data = {
@@ -22,17 +24,22 @@ def get_rates():
         print(f"Помилка Привату: {e}")
         return "Недоступно"
 
-def update_global_variable(token, var_name, var_value):
+def update_variable(token, var_name, var_value):
     headers = {'Authorization': f'Bearer {token}'}
-    payload = {"variable_value": var_value}
-    url = f'https://api.sendpulse.com/telegram/variables/set-global-variable?variable_name={var_name}'
+    payload = {
+        "contact_id": CONTACT_ID,
+        "variables": [
+            {"name": var_name, "value": var_value}
+        ]
+    }
+    # Використовуємо залізобетонний метод оновлення змінної для контакту
+    url = 'https://api.sendpulse.com/telegram/contacts/set-variable'
     response = requests.post(url, headers=headers, json=payload)
-    print(f"Оновлення {var_name}: {response.status_code} - {response.text}")
+    print(f"Оновлення контакту: {response.status_code} - {response.text}")
 
 token = get_token()
 if token:
     rate_string = get_rates()
-    # Назва змінної повинна точно збігатися з тим, що створено в SendPulse (наприклад, exchange_rate)
-    update_global_variable(token, 'exchange_rate', rate_string)
+    update_variable(token, 'exchange_rate', rate_string)
 else:
-    print("Не вдалося отримати токен доступу SendPulse")
+    print("Не вдалося отримати токен доступу")
