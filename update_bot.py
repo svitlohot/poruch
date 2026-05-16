@@ -4,8 +4,8 @@ import requests
 CLIENT_ID = os.getenv('SP_ID')
 CLIENT_SECRET = os.getenv('SP_SECRET')
 
-# !!! СЮДИ ВСТАВ СВІЙ CONTACT_ID (довгий рядок літер та цифр із картки твого контакту)
-CONTACT_ID = "69df205225c75c5ed3048310" 
+# !!! СЮДИ ВСТАВ ID СВОГО БОТА (цифри з адресного рядка, наприклад, 12345)
+BOT_ID = "69df205225c75c5ed3048310" 
 
 def get_token():
     data = {
@@ -25,25 +25,21 @@ def get_rates():
         print(f"Помилка Привату: {e}")
         return "Недоступно"
 
-def update_variable(token, var_name, var_value):
+def update_bot_global_variable(token, bot_id, var_name, var_value):
     headers = {'Authorization': f'Bearer {token}'}
     payload = {
-        "variables": [
-            {
-                "name": var_name,
-                "value": var_value
-            }
-        ]
+        "name": var_name,
+        "value": var_value
     }
-    # УНІВЕРСАЛЬНИЙ URL: Він працює без ID бота в самому посиланні!
-    url = f'https://api.sendpulse.com/messengers/contacts/{CONTACT_ID}/variables'
+    # ОФІЦІЙНИЙ ПРАВИЛЬНИЙ URL ДЛЯ ГЛОБАЛЬНИХ ЗМІННИХ БОТА
+    url = f'https://api.sendpulse.com/telegram/bots/{bot_id}/variables'
     response = requests.post(url, headers=headers, json=payload)
-    print(f"Результат оновлення змінної: {response.status_code} - {response.text}")
+    print(f"Результат оновлення глобальної змінної: {response.status_code} - {response.text}")
 
 token = get_token()
 if token:
     rate_string = get_rates()
-    # Оновлюємо нашу змінну rate_usd
-    update_variable(token, 'rate_usd', rate_string)
+    # Передаємо назву глобальної змінної, яку ми створили на першому кроці
+    update_bot_global_variable(token, BOT_ID, 'exchange_rate', rate_string)
 else:
     print("Не вдалося отримати токен доступу SendPulse")
