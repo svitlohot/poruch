@@ -2,7 +2,7 @@ name: Update Bot Image
 
 on:
   schedule:
-    - cron: '0 7,16 * * *' # Два рази на день
+    - cron: '0 */2 * * *' # Запуск кожні 2 години (00:00, 02:00, 04:00 і так далі)
   workflow_dispatch:
 
 permissions:
