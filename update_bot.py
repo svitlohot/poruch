@@ -1,45 +1,38 @@
 import os
 import requests
-
-CLIENT_ID = os.getenv('SP_ID')
-CLIENT_SECRET = os.getenv('SP_SECRET')
-
-# !!! СЮДИ ВСТАВ ID СВОГО БОТА (цифри з адресного рядка, наприклад, 12345)
-BOT_ID = "69df205225c75c5ed3048310" 
-
-def get_token():
-    data = {
-        'grant_type': 'client_credentials',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET
-    }
-    response = requests.post('https://api.sendpulse.com/oauth/access_token', json=data)
-    return response.json().get('access_token')
+from PIL import Image, ImageDraw, ImageFont
 
 def get_rates():
     try:
         res = requests.get('https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5').json()
         usd = next(item for item in res if item['ccy'] == 'USD')
-        return f"{float(usd['buy']):.2f} / {float(usd['sale']):.2f}"
-    except Exception as e:
-        print(f"Помилка Привату: {e}")
-        return "Недоступно"
+        return f"USD: {float(usd['buy']):.2f} / {float(usd['sale']):.2f}"
+    except:
+        return "USD: Недоступно"
 
-def update_bot_global_variable(token, bot_id, var_name, var_value):
-    headers = {'Authorization': f'Bearer {token}'}
-    payload = {
-        "name": var_name,
-        "value": var_value
-    }
-    # ОФІЦІЙНИЙ ПРАВИЛЬНИЙ URL ДЛЯ ГЛОБАЛЬНИХ ЗМІННИХ БОТА
-    url = f'https://api.sendpulse.com/telegram/bots/{bot_id}/variables'
-    response = requests.post(url, headers=headers, json=payload)
-    print(f"Результат оновлення глобальної змінної: {response.status_code} - {response.text}")
+def create_image(rate_text):
+    # Створюємо чисте зображення (сірий фон, наприклад #2F3136)
+    width, height = 1024, 512
+    image = Image.new("RGB", (width, height), "#2F3136")
+    draw = ImageDraw.Draw(image)
+    
+    # Малюємо фірмову бурштингову плашку вгорі (#FFBF00)
+    draw.rectangle([0, 0, width, 80], fill="#FFBF00")
+    
+    # Використовуємо дефолтний шрифт Pillow (щоб не завантажувати сторонні файли)
+    # Текст заголовка
+    draw.text((30, 25), "СТАН ГРОМАДИ ХОТЯНІВКА", fill="#2F3136")
+    
+    # Текст курсу валют
+    draw.text((50, 150), f"  Курс валют (ПриватБанк):", fill="#FFFFFF")
+    draw.text((50, 200), f"   {rate_text}", fill="#FFBF00")
+    
+    # Сюди в майбутньому допишемо погоду, тривоги чи камери
+    draw.text((50, 300), "🌳 Повітря: Чисте (EcoCity)", fill="#FFFFFF")
+    
+    # Зберігаємо картинку в корінь репозиторію
+    image.save("status.png")
+    print("Картинку status.png успішно згенеровано!")
 
-token = get_token()
-if token:
-    rate_string = get_rates()
-    # Передаємо назву глобальної змінної, яку ми створили на першому кроці
-    update_bot_global_variable(token, BOT_ID, 'exchange_rate', rate_string)
-else:
-    print("Не вдалося отримати токен доступу SendPulse")
+rate_string = get_rates()
+create_image(rate_string)
