@@ -2,6 +2,7 @@ import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+import timezonefinder # Ця бібліотека не потрібна, використаємо вбудований timedelta
 
 def get_rates():
     try:
@@ -12,17 +13,15 @@ def get_rates():
         return "Недоступно"
 
 def create_image(rate_text):
-    # Твоя фірмова палітра "Поруч"
     BG_COLOR = "#FDF8ED"      # М'який кремовий фон
-    CARD_COLOR = "#054538"    # Глибокий смарагдово-зелений для плашок
+    CARD_COLOR = "#054538"    # Глибокий смарагдово-зелений
     TEXT_LIGHT = "#FDF8ED"    # Світлий текст
-    TEXT_DARK = "#054538"     # Темний текст
+    TEXT_導K = "#054538"     # Темний текст
 
     width, height = 1024, 600
     image = Image.new("RGB", (width, height), BG_COLOR)
     draw = ImageDraw.Draw(image)
     
-    # ШЛЯХ ДО ШРИФТУ (переконайся, що назва файлу збігається з тим, що ти завантажив!)
     font_path = "Montserrat-Bold.ttf" 
     
     try:
@@ -30,29 +29,31 @@ def create_image(rate_text):
         font_data = ImageFont.truetype(font_path, 28)
         font_small = ImageFont.truetype(font_path, 18)
     except IOError:
-        # Системний фолбек, якщо шрифт не знайшовся (щоб код не падав)
         font_title = font_data = font_small = ImageFont.load_default()
 
     # 1. Головний заголовок
     draw.text((50, 40), "СТАН ГРОМАДИ ХОТЯНІВКА", fill=TEXT_DARK, font=font_title)
     
-    # 2. Плашка для Курсу Валют (малюємо закруглений прямокутник)
+    # 2. Плашка для Курсу Валют
     draw.rounded_rectangle([50, 120, 974, 250], radius=15, fill=CARD_COLOR)
     draw.text((80, 140), "Курс валют (ПриватБанк):", fill=TEXT_LIGHT, font=font_small)
     draw.text((80, 180), f"USD: {rate_text}", fill=TEXT_LIGHT, font=font_data)
     
-    # 3. Плашка для Екології
+    # 3. Плашка для Екології (Прибрали емодзі дерева, щоб не було квадратика)
     draw.rounded_rectangle([50, 280, 974, 410], radius=15, fill=CARD_COLOR)
     draw.text((80, 300), "Стан повітря (EcoCity):", fill=TEXT_LIGHT, font=font_small)
-    draw.text((80, 340), "🌳 Повітря: Чисте (Заводська, 12)", fill=TEXT_LIGHT, font=font_data)
+    draw.text((80, 340), "Повітря: Чисте (Заводська, 12)", fill=TEXT_LIGHT, font=font_data)
 
-    # 4. Внизу плашка з часом оновлення
-    current_time = datetime.now().strftime("%d.%m.%Y %H:%M")
-    draw.text((50, 530), f"Дані на: {current_time} (Оновлення автоматичне)", fill="#888888", font=font_small)
+    # 4. Внизу плашка з часом оновлення (Фікс таймзони на Київ UTC+3)
+    # Зсуваємо час сервера на 3 години вперед для літнього часу в Україні
+    from datetime import datetime, timedelta
+    kyiv_time = datetime.utcnow() + timedelta(hours=3)
+    current_time = kyiv_time.strftime("%d.%m.%Y %H:%M")
     
-    # Зберігаємо результат
+    draw.text((50, 530), f"Дані на: {current_time} (Київський час)", fill="#888888", font=font_small)
+    
     image.save("status.png")
-    print("Нову картинку status.png успішно згенеровано!")
+    print("Картинку успішно оновлено з урахуванням таймзони!")
 
 rate_string = get_rates()
 create_image(rate_string)
