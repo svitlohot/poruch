@@ -1,0 +1,27 @@
+name: Update Bot Data
+
+on:
+  schedule:
+    - cron: '0 7,16 * * *' # Запуск о 10:00 та 19:00 за київським часом (UTC+3)
+  workflow_dispatch: # Дозволяє запускати вручну кнопкою
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run script
+        env:
+          SP_ID: ${{ secrets.SP_ID }}
+          SP_SECRET: ${{ secrets.SP_SECRET }}
+        run: python update_bot.py
