@@ -5,7 +5,7 @@ CLIENT_ID = os.getenv('SP_ID')
 CLIENT_SECRET = os.getenv('SP_SECRET')
 
 # !!! СЮДИ ВСТАВ СВІЙ CONTACT_ID (довгий рядок літер та цифр із адресного рядка картки контакту)
-CONTACT_ID = "ТВІЙ_CONTACT_ID_З_СЕНДПУЛЬСУ" 
+CONTACT_ID = "69df205225c75c5ed3048310" 
 
 def get_token():
     data = {
