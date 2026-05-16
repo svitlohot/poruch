@@ -1,9 +1,12 @@
-name: Update Bot Data
+name: Update Bot Image
 
 on:
   schedule:
-    - cron: '0 7,16 * * *' # Запуск о 10:00 та 19:00 за київським часом (UTC+3)
-  workflow_dispatch: # Дозволяє запускати вручну кнопкою
+    - cron: '0 7,16 * * *' # Два рази на день
+  workflow_dispatch:
+
+permissions:
+  contents: write # Даємо право Гітхабу записувати файли в репозиторій
 
 jobs:
   build:
@@ -18,10 +21,15 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests pillow # Додали Pillow для малювання
 
       - name: Run script
-        env:
-          SP_ID: ${{ secrets.SP_ID }}
-          SP_SECRET: ${{ secrets.SP_SECRET }}
         run: python update_bot.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add status.png
+          git commit -m "Автоматичне оновлення інформера" || exit 0
+          git push
