@@ -15,7 +15,7 @@ def create_image(rate_text):
     BG_COLOR = "#FDF8ED"      # М'який кремовий фон
     CARD_COLOR = "#054538"    # Глибокий смарагдово-зелений
     TEXT_LIGHT = "#FDF8ED"    # Світлий текст
-    TEXT_導K = "#054538"     # Темний текст
+    TEXT_DARK = "#054538"    # Темний текст
 
     width, height = 1024, 600
     image = Image.new("RGB", (width, height), BG_COLOR)
