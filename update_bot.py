@@ -2,7 +2,6 @@ import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
-import timezonefinder # Ця бібліотека не потрібна, використаємо вбудований timedelta
 
 def get_rates():
     try:
