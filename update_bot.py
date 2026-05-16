@@ -13,6 +13,10 @@ def get_token():
         'client_secret': CLIENT_SECRET
     }
     response = requests.post('https://api.sendpulse.com/oauth/access_token', json=data)
+    
+    # Цей рядок покаже нам в логах Гітхабу реальну помилку від SendPulse
+    print(f"Відповідь сервера авторизації: Status {response.status_code}, Body: {response.text}")
+    
     return response.json().get('access_token')
 
 def get_rates():
