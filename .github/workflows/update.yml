@@ -26,6 +26,11 @@ jobs:
       - name: Run script
         run: python update_bot.py
 
+        - name: Run script
+        run: python update_bot.py
+        env:
+          SVITLO_KEY: ${{ secrets.SVITLO_KEY2 }}
+
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
