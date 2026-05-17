@@ -13,22 +13,20 @@ def get_rates():
 
 def check_alert():
     """ 
-    Офіційний державний дата-дамп alerts.in.ua (оновлення щохвилини).
+    Офіційний дата-дамп alerts.in.ua на серверах GitHub CDN.
     Шукаємо Вишгородський район за його офіційним ID: 1033.
     """
     try:
-        # Це пряме дзеркало офіційної мапи тривог України, хоститься на відмовостійкому CDN GitHub
         url = 'https://raw.githubusercontent.com/alerts-ua/delphi-v2-server/main/data/alerts.json'
         res = requests.get(url, timeout=10).json()
         
-        # Структура цього файлу — це список активних тривог
-        # Якщо тривога активна, об'єкт з відповідним ID буде у списку
+        # Структура файлу — це список активних тривог в Україні
         for alert in res:
-            # 1033 — це офіційний міждержавний код (ID) Вишгородського району в системі тривог
+            # 1033 — офіційний ID Вишгородського району в системі тривог
             if str(alert.get('r')) == '1033' or str(alert.get('id')) == '1033':
                 return True, "ТРИВОГА!"
                 
-            # Про всяк випадок перевіряємо текстову назву, якщо ID зміниться
+            # Резервний пошук за назвою, якщо зміняться ID
             location = str(alert.get('n', '')).lower()
             if "вишгород" in location:
                 return True, "ТРИВОГА!"
@@ -37,10 +35,10 @@ def check_alert():
         
     except Exception as e:
         print(f"Помилка офіційного CDN тривог: {e}")
-        # Якщо навіть GitHub CDN впаде, робимо фолбек на найпростіший текстовий чек
+        # Фолбек на найпростіший текстовий чек іншого сервера
         try:
             res_text = requests.get('https://api.ukrzen.in.ua/alerts/api/v1/alerts/active.json', timeout=5).text.lower()
-            if "вишгород" in res_text or "київськ" in res_text:
+            if "вишгород" in res_text:
                 return True, "ТРИВОГА!"
         except:
             pass
