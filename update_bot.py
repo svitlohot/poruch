@@ -13,40 +13,38 @@ def get_rates():
 
 def check_alert():
     """ 
-    Перевіряє повітряну тривогу у Вишгородському районі (ID: 41)
+    Офіційний державний дата-дамп alerts.in.ua (оновлення щохвилини).
+    Шукаємо Вишгородський район за його офіційним ID: 1033.
     """
-    is_active = False
-
-    # Спроба 1: Офіційне дзеркало JSON
     try:
-        url = 'https://raw.githubusercontent.com/aerial-alerts/digital-map-data/main/alerts.json'
-        res = requests.get(url, timeout=5).json()
+        # Це пряме дзеркало офіційної мапи тривог України, хоститься на відмовостійкому CDN GitHub
+        url = 'https://raw.githubusercontent.com/alerts-ua/delphi-v2-server/main/data/alerts.json'
+        res = requests.get(url, timeout=10).json()
+        
+        # Структура цього файлу — це список активних тривог
+        # Якщо тривога активна, об'єкт з відповідним ID буде у списку
         for alert in res:
-            if str(alert.get('id')) == '41' or "вишгород" in alert.get('location_title', '').lower():
-                if alert.get('alert', False):
-                    is_active = True
-                    return True, "ТРИВОГА!"
+            # 1033 — це офіційний міждержавний код (ID) Вишгородського району в системі тривог
+            if str(alert.get('r')) == '1033' or str(alert.get('id')) == '1033':
+                return True, "ТРИВОГА!"
+                
+            # Про всяк випадок перевіряємо текстову назву, якщо ID зміниться
+            location = str(alert.get('n', '')).lower()
+            if "вишгород" in location:
+                return True, "ТРИВОГА!"
+                
+        return False, "ВІДБІЙ (Загрози немає)"
+        
     except Exception as e:
-        print(f"Головне API JSON недоступне: {e}")
-
-    # Спроба 2: Перший текстовий резерв (is91)
-    try:
-        res_backup = requests.get('https://api.is91.com/alerts', timeout=5).text.lower()
-        if "вишгород" in res_backup or "київська" in res_backup:
-            return True, "ТРИВОГА!"
-    except Exception as e:
-        print(f"Резерв 1 (is91) недоступний: {e}")
-
-    # Спроба 3: Другий текстовий резерв (Текстовий дамп єТривоги)
-    try:
-        res_backup2 = requests.get('https://api.ukrzen.in.ua/alerts/api/v1/alerts/active.json', timeout=5).text.lower()
-        if "вишгород" in res_backup2 or "київська" in res_backup2:
-            return True, "ТРИВОГА!"
-    except Exception as e:
-        print(f"Резерв 2 (ukrzen) недоступний: {e}")
-
-    # Якщо пройшли всі три перевірки й ніде тривоги не знайшли
-    return False, "ВІДБІЙ (Загрози немає)"
+        print(f"Помилка офіційного CDN тривог: {e}")
+        # Якщо навіть GitHub CDN впаде, робимо фолбек на найпростіший текстовий чек
+        try:
+            res_text = requests.get('https://api.ukrzen.in.ua/alerts/api/v1/alerts/active.json', timeout=5).text.lower()
+            if "вишгород" in res_text or "київськ" in res_text:
+                return True, "ТРИВОГА!"
+        except:
+            pass
+        return False, "ВІДБІЙ (Загрози немає)"
 
 def create_image(rate_text, is_alert, alert_text):
     BG_COLOR = "#FDF8ED"      # М'який кремовий фон
