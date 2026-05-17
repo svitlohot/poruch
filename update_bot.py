@@ -1,28 +1,47 @@
+import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
 
 # ============================================
-# DATA
+# НАСТРОЙКИ
 # ============================================
 
-def get_rates():
-    try:
-        res = requests.get(
-            'https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5',
-            timeout=5
-        ).json()
+WIDTH = 1080
+HEIGHT = 1350
 
-        usd = next(item for item in res if item['ccy'] == 'USD')
-        eur = next(item for item in res if item['ccy'] == 'EUR')
+BG = "#F5F1E8"
+CARD = "#FFFDFC"
+BORDER = "#D9D4CA"
+
+TEXT = "#0D4B3E"
+SUBTEXT = "#4F7A6F"
+
+GREEN = "#DDF4D7"
+RED = "#F8D7D7"
+YELLOW = "#F5E7B8"
+BLUE = "#DCE8F5"
+PURPLE = "#E8DDF5"
+
+# ============================================
+# ДАНІ
+# ============================================
+
+def get_currency():
+    try:
+        url = "https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5"
+        data = requests.get(url, timeout=5).json()
+
+        usd = next(x for x in data if x["ccy"] == "USD")
+        eur = next(x for x in data if x["ccy"] == "EUR")
 
         return {
-            "usd": round(float(usd['sale']), 2),
-            "eur": round(float(eur['sale']), 2)
+            "usd": round(float(usd["sale"]), 2),
+            "eur": round(float(eur["sale"]), 2)
         }
 
     except Exception as e:
-        print("Rates error:", e)
+        print("Currency error:", e)
 
         return {
             "usd": "—",
@@ -30,356 +49,298 @@ def get_rates():
         }
 
 
+def get_fuel():
+    # поки заглушка
+    return {
+        "a95": "55.90",
+        "station": "Авантаж 7"
+    }
+
+
+def get_air():
+    # заглушка
+    return {
+        "aqi": 62,
+        "status": "Добре"
+    }
+
+
+def get_alert():
+    # заглушка
+    return {
+        "active": False
+    }
+
+
+def get_power():
+    # заглушка
+    return {
+        "status": "Є",
+        "desc": "Стабільно"
+    }
+
+
+def get_traffic():
+    # заглушка
+    return {
+        "time": "38 хв",
+        "route": "через Вишгород",
+        "delay": "+4 хв затримка"
+    }
+
 # ============================================
-# CARD DRAWER
+# UI
 # ============================================
 
-def draw_card(
-    draw,
-    x,
-    y,
-    w,
-    h,
-    title,
-    value,
-    subtitle,
-    circle_color,
-    accent_color,
-    font_title,
-    font_value,
-    font_small
-):
+img = Image.new("RGB", (WIDTH, HEIGHT), BG)
+draw = ImageDraw.Draw(img)
 
-    # card
+FONT_PATH = "Montserrat-Bold.ttf"
+
+try:
+    title_font = ImageFont.truetype(FONT_PATH, 76)
+    h2_font = ImageFont.truetype(FONT_PATH, 36)
+    big_font = ImageFont.truetype(FONT_PATH, 64)
+    medium_font = ImageFont.truetype(FONT_PATH, 30)
+    small_font = ImageFont.truetype(FONT_PATH, 24)
+
+except:
+    title_font = ImageFont.load_default()
+    h2_font = ImageFont.load_default()
+    big_font = ImageFont.load_default()
+    medium_font = ImageFont.load_default()
+    small_font = ImageFont.load_default()
+
+# ============================================
+# HEADER
+# ============================================
+
+draw.text((70, 60), "ПОРУЧ", fill=TEXT, font=title_font)
+
+draw.text(
+    (70, 150),
+    "СТАН ГРОМАДИ",
+    fill=TEXT,
+    font=h2_font
+)
+
+draw.text(
+    (70, 205),
+    "Хотянівка • Вишгород",
+    fill=SUBTEXT,
+    font=medium_font
+)
+
+now = datetime.utcnow() + timedelta(hours=3)
+
+draw.text(
+    (820, 70),
+    "Оновлено",
+    fill=SUBTEXT,
+    font=small_font
+)
+
+draw.text(
+    (820, 120),
+    now.strftime("%d.%m.%Y"),
+    fill=TEXT,
+    font=medium_font
+)
+
+draw.text(
+    (820, 180),
+    now.strftime("%H:%M"),
+    fill=TEXT,
+    font=big_font
+)
+
+# ============================================
+# CARD FUNCTION
+# ============================================
+
+def card(x, y, w, h, title, value, subtitle, color):
+
     draw.rounded_rectangle(
-        [x, y, x + w, y + h],
-        radius=28,
-        fill="#FFFDF8",
-        outline="#D9D9D9",
+        [x, y, x+w, y+h],
+        radius=34,
+        fill=CARD,
+        outline=BORDER,
         width=2
     )
 
-    # icon circle
+    # status circle
     draw.ellipse(
-        [x + 25, y + 35, x + 125, y + 135],
-        fill=circle_color
+        [x+35, y+35, x+135, y+135],
+        fill=color
     )
 
     # title
     draw.text(
-        (x + 150, y + 28),
+        (x+165, y+45),
         title,
-        fill="#0A3D33",
-        font=font_title
+        fill=TEXT,
+        font=h2_font
     )
 
     # value
     draw.text(
-        (x + 150, y + 78),
+        (x+165, y+105),
         value,
-        fill="#0A3D33",
-        font=font_value
+        fill=TEXT,
+        font=big_font
     )
 
     # subtitle
     draw.text(
-        (x + 150, y + 160),
+        (x+165, y+190),
         subtitle,
-        fill=accent_color,
-        font=font_small
+        fill=SUBTEXT,
+        font=medium_font
     )
-
 
 # ============================================
-# IMAGE
+# DATA
 # ============================================
 
-def create_image():
-
-    width = 1080
-    height = 1920
-
-    image = Image.new("RGB", (width, height), "#F7F4EC")
-    draw = ImageDraw.Draw(image)
-
-    # ========================================
-    # FONTS
-    # ========================================
-
-    font_path = "Montserrat-Bold.ttf"
-
-    try:
-
-        font_logo = ImageFont.truetype(font_path, 82)
-        font_header = ImageFont.truetype(font_path, 38)
-
-        font_card_title = ImageFont.truetype(font_path, 28)
-        font_card_value = ImageFont.truetype(font_path, 54)
-        font_small = ImageFont.truetype(font_path, 24)
-
-    except:
-
-        font_logo = ImageFont.load_default()
-        font_header = ImageFont.load_default()
-
-        font_card_title = ImageFont.load_default()
-        font_card_value = ImageFont.load_default()
-        font_small = ImageFont.load_default()
-
-    # ========================================
-    # TIME
-    # ========================================
-
-    kyiv_time = datetime.utcnow() + timedelta(hours=3)
-
-    date_text = kyiv_time.strftime("%d.%m.%Y")
-    time_text = kyiv_time.strftime("%H:%M")
-
-    # ========================================
-    # HEADER
-    # ========================================
-
-    draw.text(
-        (300, 70),
-        "ПОРУЧ",
-        fill="#054538",
-        font=font_logo
-    )
-
-    draw.text(
-        (300, 165),
-        "СТАН ГРОМАДИ",
-        fill="#054538",
-        font=font_header
-    )
-
-    draw.text(
-        (300, 225),
-        "Хотянівка • Вишгород",
-        fill="#2E6E56",
-        font=font_header
-    )
-
-    # update time
-
-    draw.text(
-        (820, 80),
-        "Оновлено",
-        fill="#054538",
-        font=font_small
-    )
-
-    draw.text(
-        (820, 135),
-        date_text,
-        fill="#054538",
-        font=font_small
-    )
-
-    draw.text(
-        (820, 185),
-        time_text,
-        fill="#054538",
-        font=font_header
-    )
-
-    # ========================================
-    # DATA
-    # ========================================
-
-    rates = get_rates()
-
-    # ========================================
-    # CARDS
-    # ========================================
-
-    card_w = 470
-    card_h = 320
-
-    left_x = 50
-    right_x = 560
-
-    row1 = 350
-    row2 = 700
-    row3 = 1050
-    row4 = 1400
-
-    # ========================================
-    # 1. LIGHT
-    # ========================================
-
-    draw_card(
-        draw,
-        left_x,
-        row1,
-        card_w,
-        card_h,
-        "1. СВІТЛО",
-        "Є",
-        "● Стабільно",
-        "#E6F1D9",
-        "#3A963E",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 2. ALERT
-    # ========================================
-
-    draw_card(
-        draw,
-        right_x,
-        row1,
-        card_w,
-        card_h,
-        "2. ТРИВОГА",
-        "НЕМАЄ",
-        "● Тихо в області",
-        "#FFE4E1",
-        "#3A963E",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 3. USD
-    # ========================================
-
-    draw_card(
-        draw,
-        left_x,
-        row2,
-        card_w,
-        card_h,
-        "3. КУРС ВАЛЮТ",
-        f"USD {rates['usd']}",
-        f"EUR {rates['eur']}",
-        "#E4EEF4",
-        "#2E6E56",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 4. FUEL
-    # ========================================
-
-    draw_card(
-        draw,
-        right_x,
-        row2,
-        card_w,
-        card_h,
-        "4. ПАЛИВО",
-        "A95 55.90",
-        "Авантаж 7",
-        "#FFF1CC",
-        "#F39C12",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 5. AIR
-    # ========================================
-
-    draw_card(
-        draw,
-        left_x,
-        row3,
-        card_w,
-        card_h,
-        "5. ПОВІТРЯ",
-        "AQI 62",
-        "● Добре",
-        "#ECE5F4",
-        "#3A963E",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 6. TO KYIV
-    # ========================================
-
-    draw_card(
-        draw,
-        right_x,
-        row3,
-        card_w,
-        card_h,
-        "6. ДО КИЄВА",
-        "38 хв",
-        "м. Героїв Дніпра",
-        "#EEE5F7",
-        "#E6A500",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # 7. FROM KYIV
-    # ========================================
-
-    draw_card(
-        draw,
-        left_x,
-        row4,
-        card_w,
-        240,
-        "7. З КИЄВА",
-        "42 хв",
-        "до Вишгорода",
-        "#EEE5F7",
-        "#E6A500",
-        font_card_title,
-        font_card_value,
-        font_small
-    )
-
-    # ========================================
-    # FOOTER
-    # ========================================
-
-    draw.text(
-        (60, 1800),
-        "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.",
-        fill="#054538",
-        font=font_header
-    )
-
-    draw.text(
-        (60, 1850),
-        "poruch.bot",
-        fill="#054538",
-        font=font_small
-    )
-
-    draw.text(
-        (860, 1840),
-        "v0.1",
-        fill="#888888",
-        font=font_small
-    )
-
-    # ========================================
-    # SAVE
-    # ========================================
-
-    image.save("status.png")
-
-    print("status.png generated")
-
+currency = get_currency()
+fuel = get_fuel()
+air = get_air()
+alert = get_alert()
+power = get_power()
+traffic = get_traffic()
 
 # ============================================
-# RUN
+# CARDS
 # ============================================
 
-create_image()
+LEFT = 50
+RIGHT = 545
+
+TOP = 320
+STEP = 280
+
+CARD_W = 485
+CARD_H = 240
+
+# 1 Свет
+card(
+    LEFT,
+    TOP,
+    CARD_W,
+    CARD_H,
+    "1. СВІТЛО",
+    power["status"],
+    f"🟢 {power['desc']}",
+    GREEN
+)
+
+# 2 Тривога
+alert_text = "НЕМАЄ"
+alert_sub = "🟢 Тихо"
+
+alert_color = GREEN
+
+if alert["active"]:
+    alert_text = "ТРИВОГА"
+    alert_sub = "🔴 Увага"
+    alert_color = RED
+
+card(
+    RIGHT,
+    TOP,
+    CARD_W,
+    CARD_H,
+    "2. ТРИВОГА",
+    alert_text,
+    alert_sub,
+    alert_color
+)
+
+# 3 Валюта
+card(
+    LEFT,
+    TOP + STEP,
+    CARD_W,
+    CARD_H,
+    "3. КУРС",
+    f"USD {currency['usd']}",
+    f"EUR {currency['eur']}",
+    BLUE
+)
+
+# 4 Паливо
+card(
+    RIGHT,
+    TOP + STEP,
+    CARD_W,
+    CARD_H,
+    "4. ПАЛИВО",
+    f"A95 {fuel['a95']}",
+    fuel["station"],
+    YELLOW
+)
+
+# 5 Повітря
+air_color = GREEN
+
+if air["aqi"] > 100:
+    air_color = YELLOW
+
+if air["aqi"] > 150:
+    air_color = RED
+
+card(
+    LEFT,
+    TOP + STEP*2,
+    CARD_W,
+    CARD_H,
+    "5. ПОВІТРЯ",
+    f"AQI {air['aqi']}",
+    air["status"],
+    air_color
+)
+
+# 6 Дорога
+card(
+    RIGHT,
+    TOP + STEP*2,
+    CARD_W,
+    CARD_H,
+    "6. ДО КИЄВА",
+    traffic["time"],
+    traffic["delay"],
+    PURPLE
+)
+
+# ============================================
+# FOOTER
+# ============================================
+
+draw.text(
+    (70, 1240),
+    "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.",
+    fill=TEXT,
+    font=h2_font
+)
+
+draw.text(
+    (70, 1290),
+    "poruch.bot",
+    fill=SUBTEXT,
+    font=medium_font
+)
+
+draw.text(
+    (950, 1280),
+    "v0.2",
+    fill="#888888",
+    font=small_font
+)
+
+# ============================================
+# SAVE
+# ============================================
+
+img.save("status.png")
+
+print("DONE")
