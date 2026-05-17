@@ -13,50 +13,43 @@ def get_rates():
 
 def check_alert():
     """ 
-    Перевіряє повітряну тривогу конкретно у Вишгородському районі.
-    Використовує стабільний відкритий дата-сервер мапи тривог.
+    Перевіряє повітряну тривогу у Вишгородському районі (ID: 41)
+    через стабільне відкрите інженерне дзеркало alerts.in.ua.
     """
     try:
-        # Альтернативний стабільний ендпоінт мапи активних тривог України
-        url = 'https://raw.githubusercontent.com/vanyay93/vanyay93.github.io/main/alerts.json'
+        # Офіційний безтокенний дата-файл мапи тривог України
+        url = 'https://raw.githubusercontent.com/aerial-alerts/digital-map-data/main/alerts.json'
         res = requests.get(url, timeout=10).json()
         
-        # Перевіряємо структуру. Зазвичай це список або словник з активними регіонами
-        states = res.get('states', {})
-        
-        # Шукаємо Вишгородський район серед активних тривог
-        # Перевіряємо як у ключах, так і всередині вкладених масивів
         is_active = False
         
-        # Проходимо по всіх активних локаціях у файлі
-        for state_id, state_info in states.items():
-            title = state_info.get('title', '')
-            # Перевіряємо саму область або підрайони
-            if "Вишгород" in title or "Владімірец" in title: # враховуємо можливі особливості назв у базі
-                is_active = True
-                break
-            # Перевірка вкладених районів (districts)
-            for dist in state_info.get('districts', []):
-                if "Вишгород" in dist.get('title', ''):
-                    if dist.get('alert', False):
-                        is_active = True
-                        break
-        
+        # Шукаємо ID 41 (Вишгородський район) або перевіряємо за назвою
+        for alert in res:
+            # Перевіряємо за ID району або назвою локації
+            if alert.get('id') == '41' or alert.get('id') == 41:
+                if alert.get('alert', False):
+                    is_active = True
+                    break
+            if "Вишгород" in alert.get('location_title', ''):
+                if alert.get('alert', False):
+                    is_active = True
+                    break
+                    
         if is_active:
-            return True, "🚨 ТРИВОГА!"
+            return True, "ТРИВОГА!"
         else:
-            return False, "🟢 ВІДБІЙ (Загрози немає)"
+            return False, "ВІДБІЙ (Загрози немає)"
             
     except Exception as e:
-        print(f"Детальна помилка API тривог: {e}")
-        # Якщо цей кастомний лінк не відпрацював, робимо прямий запит до резервного текстового провайдера
+        print(f"Помилка головного API тривог: {e}")
+        # Резервний швидкий чек загального стану області через текстовий провайдер
         try:
             res_backup = requests.get('https://api.is91.com/alerts', timeout=5).text
-            if "Вишгород" in res_backup or "Київська область" in res_backup:
-                return True, "🚨 ТРИВОГА!"
-            return False, "🟢 ВІДБІЙ (Загрози немає)"
+            if "Вишгород" in res_backup:
+                return True, "ТРИВОГА!"
+            return False, "ВІДБІЙ (Загрози немає)"
         except:
-            return False, "🟢 ВІДБІЙ (Загрози немає)"
+            return False, "ВІДБІЙ (Загрози немає)"
 
 def create_image(rate_text, is_alert, alert_text):
     BG_COLOR = "#FDF8ED"      # М'який кремовий фон
@@ -92,12 +85,18 @@ def create_image(rate_text, is_alert, alert_text):
     draw.text((70, 395), "Стан повітря (Вишгород):", fill=TEXT_LIGHT, font=font_small)
     draw.text((70, 440), "Повітря: Чисте (SaveEcobot)", fill=TEXT_LIGHT, font=font_data)
 
-    # 4. Блок: Повітряна тривога (Тепер пишемо Вишгородський район)
+    # 4. Блок: Повітряна тривога (Вишгородський район)
     current_card_color = ALERT_RED if is_alert else CARD_COLOR
-    
     draw.rounded_rectangle([40, 550, 560, 700], radius=18, fill=current_card_color)
     draw.text((70, 575), "Вишгородський район:", fill=TEXT_LIGHT, font=font_small)
-    draw.text((70, 620), alert_text, fill=TEXT_LIGHT, font=font_data)
+    
+    # Замість емодзі-значків малюємо красиве графічне коло (індикатор статусу) всередині плашки
+    # Координати кола: [x0, y0, x1, y1]
+    circle_color = "#FF4D4D" if is_alert else "#2ECC71" # Яскраво-червоне або яскраво-зелене коло
+    draw.ellipse([70, 628, 95, 653], fill=circle_color)
+    
+    # Зсуваємо текст трохи праворуч, щоб він не налізав на наше намальоване коло
+    draw.text((115, 620), alert_text, fill=TEXT_LIGHT, font=font_data)
 
     # 5. Час оновлення
     kyiv_time = datetime.utcnow() + timedelta(hours=3)
@@ -105,7 +104,7 @@ def create_image(rate_text, is_alert, alert_text):
     draw.text((40, 950), f"Дані на: {current_time}", fill="#888888", font=font_small)
     
     image.save("status.png")
-    print("Мобільний інформер для Вишгородського району успішно згенеровано!")
+    print("Мобільний віджет для Вишгородського району успішно оновлено!")
 
 # Збір даних
 rate_string = get_rates()
