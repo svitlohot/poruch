@@ -74,7 +74,7 @@ def get_alert():
 
 def get_power():
     try:
-        channel_key = os.environ.get("SVITLO_KEY", "EADAEFAUAF")
+        channel_key = os.environ.get("SVITLO_KEY2")
         url = f"https://api.svitlobot.in.ua/status?channel_key={channel_key}"
         text = requests.get(url, timeout=5).text
 
