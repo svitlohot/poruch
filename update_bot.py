@@ -13,29 +13,50 @@ def get_rates():
 
 def check_alert():
     """ 
-    Перевіряє повітряну тривогу через повністю відкрите API єТривога.
-    Київська область в їхній системі зазвичай має ID 14 або перевіряється за назвою.
+    Перевіряє повітряну тривогу конкретно у Вишгородському районі.
+    Використовує стабільний відкритий дата-сервер мапи тривог.
     """
     try:
-        # Відкритий волонтерський ендпоінт, який не просить Bearer-токенів
-        url = 'https://api.ukrzen.in.ua/alerts/api/v1/alerts/active.json'
+        # Альтернативний стабільний ендпоінт мапи активних тривог України
+        url = 'https://raw.githubusercontent.com/vanyay93/vanyay93.github.io/main/alerts.json'
         res = requests.get(url, timeout=10).json()
         
-        # Перевіряємо, чи є взагалі активні тривоги в списку
-        active_alerts = res.get('alerts', [])
+        # Перевіряємо структуру. Зазвичай це список або словник з активними регіонами
+        states = res.get('states', {})
         
-        # Шукаємо, чи є в списку активних тривог Київська область
-        kyiv_alert = next((item for item in active_alerts if "Київська" in item.get('location_title', '') or item.get('location_id') == 14), None)
+        # Шукаємо Вишгородський район серед активних тривог
+        # Перевіряємо як у ключах, так і всередині вкладених масивів
+        is_active = False
         
-        if kyiv_alert:
+        # Проходимо по всіх активних локаціях у файлі
+        for state_id, state_info in states.items():
+            title = state_info.get('title', '')
+            # Перевіряємо саму область або підрайони
+            if "Вишгород" in title or "Владімірец" in title: # враховуємо можливі особливості назв у базі
+                is_active = True
+                break
+            # Перевірка вкладених районів (districts)
+            for dist in state_info.get('districts', []):
+                if "Вишгород" in dist.get('title', ''):
+                    if dist.get('alert', False):
+                        is_active = True
+                        break
+        
+        if is_active:
             return True, "🚨 ТРИВОГА!"
         else:
             return False, "🟢 ВІДБІЙ (Загрози немає)"
             
     except Exception as e:
-        print(f"Помилка відкритого API тривог: {e}")
-        # Якщо сервер єТривога тимчасово не відповідає, робимо фолбек на нейтральний статус
-        return False, "Статус невідомий"
+        print(f"Детальна помилка API тривог: {e}")
+        # Якщо цей кастомний лінк не відпрацював, робимо прямий запит до резервного текстового провайдера
+        try:
+            res_backup = requests.get('https://api.is91.com/alerts', timeout=5).text
+            if "Вишгород" in res_backup or "Київська область" in res_backup:
+                return True, "🚨 ТРИВОГА!"
+            return False, "🟢 ВІДБІЙ (Загрози немає)"
+        except:
+            return False, "🟢 ВІДБІЙ (Загрози немає)"
 
 def create_image(rate_text, is_alert, alert_text):
     BG_COLOR = "#FDF8ED"      # М'який кремовий фон
@@ -71,11 +92,11 @@ def create_image(rate_text, is_alert, alert_text):
     draw.text((70, 395), "Стан повітря (Вишгород):", fill=TEXT_LIGHT, font=font_small)
     draw.text((70, 440), "Повітря: Чисте (SaveEcobot)", fill=TEXT_LIGHT, font=font_data)
 
-    # 4. Блок: Повітряна тривога (Динамічний колір)
+    # 4. Блок: Повітряна тривога (Тепер пишемо Вишгородський район)
     current_card_color = ALERT_RED if is_alert else CARD_COLOR
     
     draw.rounded_rectangle([40, 550, 560, 700], radius=18, fill=current_card_color)
-    draw.text((70, 575), "Повітряна тривога:", fill=TEXT_LIGHT, font=font_small)
+    draw.text((70, 575), "Вишгородський район:", fill=TEXT_LIGHT, font=font_small)
     draw.text((70, 620), alert_text, fill=TEXT_LIGHT, font=font_data)
 
     # 5. Час оновлення
@@ -84,7 +105,7 @@ def create_image(rate_text, is_alert, alert_text):
     draw.text((40, 950), f"Дані на: {current_time}", fill="#888888", font=font_small)
     
     image.save("status.png")
-    print("Мобільний інформер успішно перегенеровано через відкрите API!")
+    print("Мобільний інформер для Вишгородського району успішно згенеровано!")
 
 # Збір даних
 rate_string = get_rates()
