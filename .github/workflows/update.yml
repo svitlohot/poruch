@@ -26,10 +26,10 @@ jobs:
       - name: Run script
         run: python update_bot.py
 
-        - name: Run script
+      - name: Run script
         run: python update_bot.py
         env:
-          SVITLO_KEY: ${{ secrets.SVITLO_KEY2 }}
+        SVITLO_KEY: ${{ secrets.SVITLO_KEY2 }}
 
       - name: Commit and Push changes
         run: |
