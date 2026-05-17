@@ -67,12 +67,27 @@ def get_power():
     return {"hotyanivka": s1, "vyshhorod": s2}
 
 
+def get_air():
+    try:
+        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.58&longitude=30.47&current=european_aqi"
+        data = requests.get(url, timeout=5).json()
+        aqi = int(data["current"]["european_aqi"])
+
+        if aqi <= 20:   status = "Відмінно"
+        elif aqi <= 40: status = "Добре"
+        elif aqi <= 60: status = "Помірно"
+        elif aqi <= 80: status = "Погано"
+        else:           status = "Дуже погано"
+
+        print(f"Air: AQI={aqi}, {status}")
+        return {"aqi": aqi, "status": status}
+    except Exception as e:
+        print("Air error:", e)
+        return {"aqi": "—", "status": "Помилка"}
+
+
 def get_fuel():
     return {"a95": "55.90", "station": "Авантаж 7"}
-
-
-def get_air():
-    return {"aqi": 62, "status": "Добре"}
 
 
 def get_alert():
@@ -225,8 +240,9 @@ card(
 
 # 5. ПОВІТРЯ
 air_color = GREEN
-if air["aqi"] > 100: air_color = YELLOW
-if air["aqi"] > 150: air_color = RED
+if isinstance(air["aqi"], int):
+    if air["aqi"] > 40: air_color = YELLOW
+    if air["aqi"] > 80: air_color = RED
 
 card(
     LEFT, TOP + STEP*2, CARD_W, CARD_H,
@@ -251,7 +267,7 @@ card(
 
 draw.text((70, 1240),  "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.", fill=TEXT,      font=h2_font)
 draw.text((70, 1290),  "poruch.bot",               fill=SUBTEXT,   font=medium_font)
-draw.text((950, 1280), "v0.4",                     fill="#888888", font=small_font)
+draw.text((950, 1280), "v0.5",                     fill="#888888", font=small_font)
 
 # ============================================
 # SAVE
