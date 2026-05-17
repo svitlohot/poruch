@@ -203,8 +203,8 @@ power_color = GREEN if p["hotyanivka"] == "Є" and p["vyshhorod"] == "Є" else R
 card_power(
     LEFT, TOP, CARD_W, CARD_H,
     "СВІТЛО",
-    f"{icon1}  Хотянівка: {p['hotyanivka']}",
-    f"{icon2}  Вишгород:  {p['vyshhorod']}",
+    p["hotyanivka"],
+    p["vyshhorod"],
     power_color
 )
 
