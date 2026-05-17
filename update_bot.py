@@ -12,36 +12,26 @@ def get_rates():
         return "Недоступно"
 
 def check_alert():
-    """ 
-    Офіційний дата-дамп alerts.in.ua на серверах GitHub CDN.
-    Шукаємо Вишгородський район за його офіційним ID: 1033.
-    """
     try:
         url = 'https://raw.githubusercontent.com/alerts-ua/delphi-v2-server/main/data/alerts.json'
         res = requests.get(url, timeout=10).json()
         
-        # Структура файлу — це список активних тривог в Україні
-        for alert in res:
-            # 1033 — офіційний ID Вишгородського району в системі тривог
-            if str(alert.get('r')) == '1033' or str(alert.get('id')) == '1033':
-                return True, "ТРИВОГА!"
-                
-            # Резервний пошук за назвою, якщо зміняться ID
-            location = str(alert.get('n', '')).lower()
-            if "вишгород" in location:
-                return True, "ТРИВОГА!"
-                
+        # Виводимо перші 5 елементів відповіді в лог GitHub, щоб розібратися в структурі
+        print("ДІАГНОСТИКА СТРУКТУРИ API:")
+        print(str(res)[:1000]) # Покаже перші 1000 символів відповіді
+        
+        # Спробуємо простий текстовий пошук по всьому сирому JSON
+        import json
+        raw_json_text = json.dumps(res).lower()
+        
+        if "вишгород" in raw_json_text or "1033" in raw_json_text:
+            print("Знайдено згадку Вишгорода або ID 1033 у сирому тексті!")
+            return True, "ТРИВОГА!"
+            
         return False, "ВІДБІЙ (Загрози немає)"
         
     except Exception as e:
-        print(f"Помилка офіційного CDN тривог: {e}")
-        # Фолбек на найпростіший текстовий чек іншого сервера
-        try:
-            res_text = requests.get('https://api.ukrzen.in.ua/alerts/api/v1/alerts/active.json', timeout=5).text.lower()
-            if "вишгород" in res_text:
-                return True, "ТРИВОГА!"
-        except:
-            pass
+        print(f"Помилка діагностики: {e}")
         return False, "ВІДБІЙ (Загрози немає)"
 
 def create_image(rate_text, is_alert, alert_text):
