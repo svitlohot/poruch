@@ -10,17 +10,17 @@ from datetime import datetime, timedelta
 WIDTH = 1080
 HEIGHT = 1350
 
-BG = "#F5F1E8"
-CARD = "#FFFDFC"
+BG     = "#F5F1E8"
+CARD   = "#FFFDFC"
 BORDER = "#D9D4CA"
 
-TEXT = "#0D4B3E"
+TEXT    = "#0D4B3E"
 SUBTEXT = "#4F7A6F"
 
-GREEN = "#DDF4D7"
-RED = "#F8D7D7"
+GREEN  = "#DDF4D7"
+RED    = "#F8D7D7"
 YELLOW = "#F5E7B8"
-BLUE = "#DCE8F5"
+BLUE   = "#DCE8F5"
 PURPLE = "#E8DDF5"
 
 # ============================================
@@ -64,51 +64,32 @@ def get_power():
     s2 = fetch_status(key2) if key2 else "—"
 
     print(f"Power: Хотянівка={s1}, Вишгород={s2}")
-    return {
-        "hotyanivka": s1,
-        "vyshhorod": s2
-    }
+    return {"hotyanivka": s1, "vyshhorod": s2}
 
 
 def get_fuel():
-    # заглушка
-    return {
-        "a95": "55.90",
-        "station": "Авантаж 7"
-    }
+    return {"a95": "55.90", "station": "Авантаж 7"}
 
 
 def get_air():
-    # заглушка
-    return {
-        "aqi": 62,
-        "status": "Добре"
-    }
+    return {"aqi": 62, "status": "Добре"}
 
 
 def get_alert():
-    # заглушка
-    return {
-        "active": False
-    }
+    return {"active": False}
 
 
 def get_traffic():
-    # заглушка
-    return {
-        "time": "38 хв",
-        "route": "через Вишгород",
-        "delay": "+4 хв затримка"
-    }
+    return {"time": "38 хв", "delay": "+4 хв затримка"}
 
 # ============================================
 # UI
 # ============================================
 
-img = Image.new("RGB", (WIDTH, HEIGHT), BG)
+img  = Image.new("RGB", (WIDTH, HEIGHT), BG)
 draw = ImageDraw.Draw(img)
 
-FONT_PATH = "Montserrat-Bold.ttf"
+FONT_PATH = "Ubuntu-Bold.ttf"
 
 try:
     title_font  = ImageFont.truetype(FONT_PATH, 76)
@@ -127,14 +108,14 @@ except:
 # HEADER
 # ============================================
 
-draw.text((70, 60),  "ПОРУЧ",           fill=TEXT,    font=title_font)
-draw.text((70, 150), "СТАН ГРОМАДИ",    fill=TEXT,    font=h2_font)
+draw.text((70, 60),  "ПОРУЧ",                fill=TEXT,    font=title_font)
+draw.text((70, 150), "СТАН ГРОМАДИ",         fill=TEXT,    font=h2_font)
 draw.text((70, 205), "Хотянівка • Вишгород", fill=SUBTEXT, font=medium_font)
 
 now = datetime.utcnow() + timedelta(hours=3)
-draw.text((820, 70),  "Оновлено",           fill=SUBTEXT, font=small_font)
-draw.text((820, 120), now.strftime("%d.%m.%Y"), fill=TEXT, font=medium_font)
-draw.text((820, 180), now.strftime("%H:%M"),    fill=TEXT, font=big_font)
+draw.text((820, 70),  "Оновлено",               fill=SUBTEXT, font=small_font)
+draw.text((820, 120), now.strftime("%d.%m.%Y"), fill=TEXT,    font=medium_font)
+draw.text((820, 180), now.strftime("%H:%M"),    fill=TEXT,    font=big_font)
 
 # ============================================
 # CARD FUNCTIONS
@@ -142,11 +123,8 @@ draw.text((820, 180), now.strftime("%H:%M"),    fill=TEXT, font=big_font)
 
 def card(x, y, w, h, title, value, subtitle, color):
     draw.rounded_rectangle(
-        [x, y, x+w, y+h],
-        radius=34,
-        fill=CARD,
-        outline=BORDER,
-        width=2
+        [x, y, x+w, y+h], radius=34,
+        fill=CARD, outline=BORDER, width=2
     )
     draw.ellipse([x+35, y+35, x+135, y+135], fill=color)
     draw.text((x+165, y+45),  title,    fill=TEXT,    font=h2_font)
@@ -154,23 +132,42 @@ def card(x, y, w, h, title, value, subtitle, color):
     draw.text((x+165, y+190), subtitle, fill=SUBTEXT, font=medium_font)
 
 
-def card_power(x, y, w, h, title, s1, s2, color):
+def dot_color(status):
+    if status == "Є":     return "#4CAF50"
+    if status == "Немає": return "#E53935"
+    return "#9E9E9E"
+
+
+def card_power(x, y, w, h, s1, s2, bg_color):
     draw.rounded_rectangle(
-        [x, y, x+w, y+h],
-        radius=34, fill=CARD, outline=BORDER, width=2
+        [x, y, x+w, y+h], radius=34,
+        fill=CARD, outline=BORDER, width=2
     )
-    draw.ellipse([x+35, y+35, x+135, y+135], fill=color)
-    draw.text((x+165, y+40), title, fill=TEXT, font=h2_font)
+    draw.ellipse([x+35, y+35, x+135, y+135], fill=bg_color)
+    draw.text((x+165, y+35), "СВІТЛО", fill=TEXT, font=h2_font)
 
-    # Рядок 1 — Хотянівка
-    dot1 = "#4CAF50" if s1 == "Є" else ("#E53935" if s1 == "Немає" else "#9E9E9E")
-    draw.ellipse([x+165, y+100, x+191, y+126], fill=dot1)
-    draw.text((x+202, y+100), f"Хотянівка: {s1}", fill=TEXT, font=medium_font)
+    draw.ellipse([x+165, y+98,  x+187, y+120], fill=dot_color(s1))
+    draw.text(   (x+200, y+95),  f"Хотянівка: {s1}", fill=TEXT, font=medium_font)
 
-    # Рядок 2 — Вишгород
-    dot2 = "#4CAF50" if s2 == "Є" else ("#E53935" if s2 == "Немає" else "#9E9E9E")
-    draw.ellipse([x+165, y+145, x+191, y+171], fill=dot2)
-    draw.text((x+202, y+145), f"Вишгород: {s2}",  fill=TEXT, font=medium_font)
+    draw.ellipse([x+165, y+143, x+187, y+165], fill=dot_color(s2))
+    draw.text(   (x+200, y+140), f"Вишгород: {s2}",  fill=TEXT, font=medium_font)
+
+
+def card_alert(x, y, w, h, active):
+    bg_color   = RED        if active else GREEN
+    dot        = "#E53935"  if active else "#4CAF50"
+    value_text = "ТРИВОГА"  if active else "НЕМАЄ"
+    sub_text   = "Увага"    if active else "Тихо"
+
+    draw.rounded_rectangle(
+        [x, y, x+w, y+h], radius=34,
+        fill=CARD, outline=BORDER, width=2
+    )
+    draw.ellipse([x+35, y+35, x+135, y+135], fill=bg_color)
+    draw.text((x+165, y+45),  "ТРИВОГА",  fill=TEXT,    font=h2_font)
+    draw.text((x+165, y+105), value_text, fill=TEXT,    font=big_font)
+    draw.ellipse([x+165, y+193, x+187, y+215], fill=dot)
+    draw.text(   (x+200, y+190), sub_text, fill=SUBTEXT, font=medium_font)
 
 # ============================================
 # DATA
@@ -194,37 +191,19 @@ STEP   = 280
 CARD_W = 485
 CARD_H = 240
 
-# 1. СВІТЛО (два рядки)
-p = power
-icon1 = "🟢" if p["hotyanivka"] == "Є" else "🔴"
-icon2 = "🟢" if p["vyshhorod"]  == "Є" else "🔴"
-power_color = GREEN if p["hotyanivka"] == "Є" and p["vyshhorod"] == "Є" else RED
+# 1. СВІТЛО
+both_on     = power["hotyanivka"] == "Є" and power["vyshhorod"] == "Є"
+power_color = GREEN if both_on else RED
 
 card_power(
     LEFT, TOP, CARD_W, CARD_H,
-    "СВІТЛО",
-    p["hotyanivka"],
-    p["vyshhorod"],
+    power["hotyanivka"],
+    power["vyshhorod"],
     power_color
 )
 
 # 2. ТРИВОГА
-alert_text  = "НЕМАЄ"
-alert_sub   = "🟢 Тихо"
-alert_color = GREEN
-
-if alert["active"]:
-    alert_text  = "ТРИВОГА"
-    alert_sub   = "🔴 Увага"
-    alert_color = RED
-
-card(
-    RIGHT, TOP, CARD_W, CARD_H,
-    "ТРИВОГА",
-    alert_text,
-    alert_sub,
-    alert_color
-)
+card_alert(RIGHT, TOP, CARD_W, CARD_H, alert["active"])
 
 # 3. КУРС ВАЛЮТ
 card(
@@ -270,9 +249,9 @@ card(
 # FOOTER
 # ============================================
 
-draw.text((70, 1240),  "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.", fill=TEXT,    font=h2_font)
-draw.text((70, 1290),  "poruch.bot",               fill=SUBTEXT, font=medium_font)
-draw.text((950, 1280), "v0.3",                     fill="#888888", font=small_font)
+draw.text((70, 1240),  "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.", fill=TEXT,      font=h2_font)
+draw.text((70, 1290),  "poruch.bot",               fill=SUBTEXT,   font=medium_font)
+draw.text((950, 1280), "v0.4",                     fill="#888888", font=small_font)
 
 # ============================================
 # SAVE
