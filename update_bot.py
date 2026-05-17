@@ -69,7 +69,7 @@ def get_power():
 
 def get_air():
     try:
-        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.58&longitude=30.47&current=european_aqi"
+        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.5486&longitude=30.4197&current=european_aqi"
         data = requests.get(url, timeout=5).json()
         aqi = int(data["current"]["european_aqi"])
 
@@ -80,10 +80,10 @@ def get_air():
         else:           status = "Дуже погано"
 
         print(f"Air: AQI={aqi}, {status}")
-        return {"aqi": aqi, "status": status}
+        return {"aqi": aqi, "status": status, "location": "Хотянівка"}
     except Exception as e:
         print("Air error:", e)
-        return {"aqi": "—", "status": "Помилка"}
+        return {"aqi": "—", "status": "Помилка", "location": ""}
 
 
 def get_fuel():
@@ -246,7 +246,7 @@ if isinstance(air["aqi"], int):
 
 card(
     LEFT, TOP + STEP*2, CARD_W, CARD_H,
-    "ПОВІТРЯ",
+    f"ПОВІТРЯ · {air.get('location', '')}",
     f"AQI {air['aqi']}",
     air["status"],
     air_color
