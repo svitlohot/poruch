@@ -73,11 +73,21 @@ def get_alert():
 
 
 def get_power():
-    # заглушка
-    return {
-        "status": "Є",
-        "desc": "Стабільно"
-    }
+    try:
+        channel_key = os.environ.get("SVITLO_KEY", "EADAEFAUAF")
+        url = f"https://api.svitlobot.in.ua/status?channel_key={channel_key}"
+        text = requests.get(url, timeout=5).text
+
+        if "світло є" in text.lower():
+            return {"status": "Є", "desc": "Стабільно"}
+        elif "світла немає" in text.lower():
+            return {"status": "Немає", "desc": "Відключено"}
+        else:
+            return {"status": "—", "desc": "Невідомо"}
+
+    except Exception as e:
+        print("Power error:", e)
+        return {"status": "—", "desc": "Помилка"}
 
 
 def get_traffic():
