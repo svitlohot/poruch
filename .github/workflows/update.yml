@@ -24,6 +24,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
           git add status.png
           git commit -m "Автоматичне оновлення інформера" || exit 0
           git push
