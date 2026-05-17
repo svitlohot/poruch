@@ -154,19 +154,23 @@ def card(x, y, w, h, title, value, subtitle, color):
     draw.text((x+165, y+190), subtitle, fill=SUBTEXT, font=medium_font)
 
 
-def card_power(x, y, w, h, title, line1, line2, color):
-    """Картка з двома рядками замість одного великого значення"""
+def card_power(x, y, w, h, title, s1, s2, color):
     draw.rounded_rectangle(
         [x, y, x+w, y+h],
-        radius=34,
-        fill=CARD,
-        outline=BORDER,
-        width=2
+        radius=34, fill=CARD, outline=BORDER, width=2
     )
     draw.ellipse([x+35, y+35, x+135, y+135], fill=color)
-    draw.text((x+165, y+40),  title, fill=TEXT,    font=h2_font)
-    draw.text((x+165, y+100), line1, fill=TEXT,    font=medium_font)
-    draw.text((x+165, y+145), line2, fill=TEXT,    font=medium_font)
+    draw.text((x+165, y+40), title, fill=TEXT, font=h2_font)
+
+    # Рядок 1 — Хотянівка
+    dot1 = "#4CAF50" if s1 == "Є" else ("#E53935" if s1 == "Немає" else "#9E9E9E")
+    draw.ellipse([x+165, y+100, x+191, y+126], fill=dot1)
+    draw.text((x+202, y+100), f"Хотянівка: {s1}", fill=TEXT, font=medium_font)
+
+    # Рядок 2 — Вишгород
+    dot2 = "#4CAF50" if s2 == "Є" else ("#E53935" if s2 == "Немає" else "#9E9E9E")
+    draw.ellipse([x+165, y+145, x+191, y+171], fill=dot2)
+    draw.text((x+202, y+145), f"Вишгород: {s2}",  fill=TEXT, font=medium_font)
 
 # ============================================
 # DATA
