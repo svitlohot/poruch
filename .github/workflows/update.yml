@@ -1,36 +1,27 @@
 name: Update Bot Image
-
 on:
   schedule:
-    - cron: '*/30 * * * *' # Автоматичний запуск кожні 30 хвилин (о 00, 30 хвилинах кожної години)
+    - cron: '*/30 * * * *'
   workflow_dispatch:
-
 permissions:
-  contents: write # Даємо право Гітхабу записувати файли в репозиторій
-
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
       - name: Install dependencies
-        run: pip install requests pillow # Додали Pillow для малювання
-
-      - name: Run script
-        run: python update_bot.py
-
+        run: pip install requests pillow
       - name: Run script
         run: python update_bot.py
         env:
-        SVITLO_KEY: ${{ secrets.SVITLO_KEY2 }}
-
+          SVITLO_KEY: ${{ secrets.SVITLO_KEY }}
+          SVITLO_KEY2: ${{ secrets.SVITLO_KEY2 }}
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
