@@ -209,10 +209,10 @@ def card_power(x, y, w, h, s1, s2, bg_color):
     draw.text((x+165, y+35), "СВІТЛО", fill=TEXT, font=h2_font)
 
     draw.ellipse([x+165, y+98,  x+187, y+120], fill=dot_color(s1))
-    draw.text(   (x+200, y+95),  f"Хотянівка: {s1}", fill=TEXT, font=medium_font)
+    draw.text(   (x+200, y+95),  f"Хотянівка (СТ): {s1}", fill=TEXT, font=medium_font)
 
     draw.ellipse([x+165, y+143, x+187, y+165], fill=dot_color(s2))
-    draw.text((x+200, y+140), f"ПБХ/Осещина: {s2}",  fill=TEXT, font=medium_font)
+    draw.text((x+200, y+140), f"ПБХ/Осещина/МР: {s2}",  fill=TEXT, font=medium_font)
 
 
 def card_alert(x, y, w, h, active):
