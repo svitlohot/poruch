@@ -63,7 +63,7 @@ def get_power():
     s1 = fetch_status(key1) if key1 else "—"
     s2 = fetch_status(key2) if key2 else "—"
 
-    print(f"Power: Хотянівка={s1}, Вишгород={s2}")
+    print(f"Power: Хотянівка={s1}, ПБХ, Осещина, МР={s2}")
     return {"hotyanivka": s1, "vyshhorod": s2}
 
 
@@ -128,7 +128,14 @@ def get_traffic():
         duration_normal = element["duration"]["value"] // 60
         delay = duration - duration_normal
 
-        delay_text = f"+{delay} хв затримка" if delay > 2 else "Вільно"
+        if delay <= 2:
+            delay_text = "Вільно"
+        elif delay <= 10:
+            delay_text = "Помірно"
+        elif delay <= 20:
+            delay_text = "Затори"
+        else:
+            delay_text = "Стоїмо"
 
         print(f"Traffic: {duration} хв, затримка {delay} хв")
         return {"time": f"{duration} хв", "delay": delay_text}
