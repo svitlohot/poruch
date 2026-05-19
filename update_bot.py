@@ -111,8 +111,8 @@ def get_traffic():
         key = os.environ.get("GOOGLE_MAPS_KEY", "")
         url = (
             "https://maps.googleapis.com/maps/api/distancematrix/json"
-            f"?origins=50.5486,30.4197"
-            f"&destinations=50.5051,30.4978"
+            f"?origins=50.59587618912401,30.56582047829475"
+            f"&destinations=50.52299641605543,30.498424434465736"
             f"&mode=driving"
             f"&departure_time=now"
             f"&language=uk"
