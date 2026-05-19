@@ -87,7 +87,7 @@ def get_air():
 
 
 def get_fuel():
-    return {"a95": "55.90", "station": "Авантаж 7"}
+    return {"a95": "--", "station": "Авантаж 7"}
 
 
 def get_alert():
@@ -312,7 +312,7 @@ card(
 # FOOTER
 # ============================================
 
-draw.text((70, 1240),  "ЛОКАЛЬНЕ. КОРИСНЕ. НАШЕ.", fill=TEXT,      font=h2_font)
+draw.text((70, 1240),  "ЛОКАЛЬНЕ. КОРИСНЕ.", fill=TEXT,      font=h2_font)
 draw.text((70, 1290),  "poruch.bot",               fill=SUBTEXT,   font=medium_font)
 draw.text((950, 1280), "v0.5",                     fill="#888888", font=small_font)
 
