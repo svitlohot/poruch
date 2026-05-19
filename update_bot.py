@@ -94,8 +94,11 @@ def get_alert():
     try:
         url = "https://siren.pp.ua/api/v3/alerts"
         data = requests.get(url, timeout=5).json()
-        kyiv = next((r for r in data if r.get("regionName") == "Київська область"), None)
-        active = kyiv and bool(kyiv.get("activeAlerts"))
+        vyshhorod = next(
+            (r for r in data if r.get("regionId") == "74"),
+            None
+        )
+        active = vyshhorod and bool(vyshhorod.get("activeAlerts"))
         print(f"Alert: {'ТРИВОГА' if active else 'Тихо'}")
         return {"active": bool(active)}
     except Exception as e:
