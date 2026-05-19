@@ -20,6 +20,7 @@ jobs:
         env:
           SVITLO_KEY: ${{ secrets.SVITLO_KEY }}
           SVITLO_KEY2: ${{ secrets.SVITLO_KEY2 }}
+          GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
