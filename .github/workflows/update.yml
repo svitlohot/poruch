@@ -18,7 +18,7 @@ jobs:
       - name: Run script
         run: python update_bot.py
         env:
-          SVITLO_KEY: ${{ secrets.SVITLO_KEY }}
+          SVITLO_KEY1: ${{ secrets.SVITLO_KEY1 }}
           SVITLO_KEY2: ${{ secrets.SVITLO_KEY2 }}
           GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
       - name: Commit and Push changes
