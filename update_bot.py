@@ -57,7 +57,7 @@ def get_power():
             print("Power fetch error:", e)
             return "—"
 
-    key1 = os.environ.get("SVITLO_KEY", "")
+    key1 = os.environ.get("SVITLO_KEY1", "")
     key2 = os.environ.get("SVITLO_KEY2", "")
 
     s1 = fetch_status(key1) if key1 else "—"
