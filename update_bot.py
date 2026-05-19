@@ -172,7 +172,7 @@ except:
 
 draw.text((70, 60),  "ПОРУЧ",                fill=TEXT,    font=title_font)
 draw.text((70, 150), "СТАН ГРОМАДИ",         fill=TEXT,    font=h2_font)
-draw.text((70, 205), "Хотянівка • Вишгород", fill=SUBTEXT, font=medium_font)
+draw.text((70, 205), "Хотянівка", fill=SUBTEXT, font=medium_font)
 
 now = datetime.utcnow() + timedelta(hours=3)
 draw.text((820, 70),  "Оновлено",               fill=SUBTEXT, font=small_font)
@@ -212,7 +212,7 @@ def card_power(x, y, w, h, s1, s2, bg_color):
     draw.text(   (x+200, y+95),  f"Хотянівка: {s1}", fill=TEXT, font=medium_font)
 
     draw.ellipse([x+165, y+143, x+187, y+165], fill=dot_color(s2))
-    draw.text(   (x+200, y+140), f"Вишгород: {s2}",  fill=TEXT, font=medium_font)
+    draw.text((x+200, y+140), f"ПБХ/Осещина: {s2}",  fill=TEXT, font=medium_font)
 
 
 def card_alert(x, y, w, h, active):
