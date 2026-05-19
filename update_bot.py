@@ -107,7 +107,35 @@ def get_alert():
 
 
 def get_traffic():
-    return {"time": "38 хв", "delay": "+4 хв затримка"}
+    try:
+        key = os.environ.get("GOOGLE_MAPS_KEY", "")
+        url = (
+            "https://maps.googleapis.com/maps/api/distancematrix/json"
+            f"?origins=50.5486,30.4197"
+            f"&destinations=50.5051,30.4978"
+            f"&mode=driving"
+            f"&departure_time=now"
+            f"&language=uk"
+            f"&key={key}"
+        )
+        data = requests.get(url, timeout=5).json()
+        element = data["rows"][0]["elements"][0]
+
+        if element["status"] != "OK":
+            return {"time": "—", "delay": "Немає даних"}
+
+        duration = element["duration_in_traffic"]["value"] // 60
+        duration_normal = element["duration"]["value"] // 60
+        delay = duration - duration_normal
+
+        delay_text = f"+{delay} хв затримка" if delay > 2 else "Вільно"
+
+        print(f"Traffic: {duration} хв, затримка {delay} хв")
+        return {"time": f"{duration} хв", "delay": delay_text}
+
+    except Exception as e:
+        print("Traffic error:", e)
+        return {"time": "—", "delay": "Помилка"}
 
 # ============================================
 # UI
