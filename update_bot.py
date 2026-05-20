@@ -162,9 +162,9 @@ draw.text((tx, 30),  "СТАН ГРОМАДИ", fill=TEXT,    font=f_header)
 draw.text((tx, 118), "Хотянівка",    fill=SUBTEXT, font=f_sub)
 
 # Дата і час — права зона, вирівняно по правому краю
-draw.text((650, 30),  "Оновлено",               fill=SUBTEXT, font=f_tiny)
-draw.text((650, 58),  now.strftime("%d.%m.%Y"), fill=TEXT,    font=f_small)
-draw.text((650, 95),  now.strftime("%H:%M"),    fill=TEXT,    font=f_time)
+draw.text((820, 30),  "Оновлено",               fill=SUBTEXT, font=f_tiny)
+draw.text((820, 58),  now.strftime("%d.%m.%Y"), fill=TEXT,    font=f_small)
+draw.text((820, 95),  now.strftime("%H:%M"),    fill=TEXT,    font=f_time)
 
 draw.rectangle([0, HEADER_H, WIDTH, HEADER_H+3], fill=BORDER)
 
@@ -292,9 +292,9 @@ draw.text((R+PX, TY+S*2+200), "з урахуванням пробок",         
 
 fy = TY + S*3 + 16
 draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
-draw.text((50, fy+14), "Стан громади оновлюється кожні 10 хв",  fill=SUBTEXT, font=f_small)
-draw.text((50, fy+48), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,    font=f_footer)
-draw.text((960, fy+54), "v0.9", fill="#BBBBBB", font=f_tiny)
+draw.text((50, fy+14), "Стан громади оновлюється кожні 10 хв",  fill=SUBTEXT, font=f_footer)
+draw.text((50, fy+58), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,    font=f_footer)
+draw.text((960, fy+64), "v0.9", fill="#BBBBBB", font=f_small)
 
 # ============================================
 # SAVE
