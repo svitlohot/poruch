@@ -58,46 +58,18 @@ def get_power():
 
 def get_air():
     try:
-        key = os.environ.get("GOOGLE_MAPS_KEY", "")
-        url = "https://airquality.googleapis.com/v1/currentConditions:lookup"
-        payload = {
-            "location": {"latitude": 50.5486, "longitude": 30.4197},
-            "languageCode": "uk"
-        }
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(
-            f"{url}?key={key}",
-            json=payload,
-            headers=headers,
-            timeout=5
-        )
-        data = response.json()
+        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.5486&longitude=30.4197&current=european_aqi"
+        data = requests.get(url, timeout=5).json()
+        aqi = int(data["current"]["european_aqi"])
 
-        # Беремо Universal AQI
-        aqi_info = next(
-            (i for i in data.get("indexes", []) if i.get("code") == "uaqi"),
-            None
-        )
-        if not aqi_info:
-            raise ValueError("No AQI data")
-
-        aqi = aqi_info.get("aqiDisplay", "—")
-        category = aqi_info.get("category", "")
-
-        # Перекладаємо категорію
-        translations = {
-            "Excellent air quality": "Відмінно",
-            "Good air quality": "Добре",
-            "Moderate air quality": "Помірно",
-            "Low air quality": "Погано",
-            "Poor air quality": "Дуже погано",
-            "Hazardous air quality": "Небезпечно",
-        }
-        status = translations.get(category, category)
+        if aqi <= 20:   status = "Чудова якість"
+        elif aqi <= 40: status = "Хороша якість"
+        elif aqi <= 60: status = "Помірна якість"
+        elif aqi <= 80: status = "Погана якість"
+        else:           status = "Небезпечно"
 
         print(f"Air: AQI={aqi}, {status}")
         return {"aqi": aqi, "status": status}
-
     except Exception as e:
         print("Air error:", e)
         return {"aqi": "—", "status": "Помилка"}
@@ -298,10 +270,10 @@ else:
     ta_air = C_TEAL
 
 draw_card(L, TY+S*2, ta_air)
-draw.text((L+PX, TY+S*2+PY),  "ПОВІТРЯ · Хотянівка", fill=ta_air["dark"],   font=f_label)
+draw.text((L+PX, TY+S*2+PY),  "ЯКІСТЬ ПОВІТРЯ · Хотянівка", fill=ta_air["dark"],   font=f_label)
 draw.text((L+PX, TY+S*2+58),  f"AQI {aqi_val}",      fill=ta_air["dark"],   font=f_big)
 draw.text((L+PX, TY+S*2+145), air["status"],          fill=ta_air["accent"], font=f_medium)
-draw.text((L+PX, TY+S*2+200), "European AQI",         fill=ta_air["accent"], font=f_tiny)
+draw.text((L+PX, TY+S*2+200), "за European AQI шкалою",         fill=ta_air["accent"], font=f_tiny)
 
 # ============================================
 # 6. ДО КИЄВА
