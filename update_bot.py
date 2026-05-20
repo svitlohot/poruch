@@ -75,7 +75,30 @@ def get_air():
         return {"aqi": "—", "status": "Помилка"}
 
 def get_fuel():
-    return {"a95": "55.90", "gas": "—", "diesel": "—", "station": "Авантаж 7"}
+    try:
+        from bs4 import BeautifulSoup
+        url = "https://index.minfin.com.ua/ua/markets/fuel/reg/kievskaya/"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        html = requests.get(url, headers=headers, timeout=10).text
+        soup = BeautifulSoup(html, "html.parser")
+
+        # Шукаємо рядок Авантаж 7 в таблиці
+        row = soup.find("a", string="Авантаж 7")
+        if row:
+            cells = row.find_parent("tr").find_all("td")
+            # А-95, Дизель, Газ
+            a95    = cells[2].text.strip() if len(cells) > 2 else "—"
+            diesel = cells[4].text.strip() if len(cells) > 4 else "—"
+            gas    = cells[5].text.strip() if len(cells) > 5 else "—"
+        else:
+            a95 = diesel = gas = "—"
+
+        print(f"Fuel: A95={a95}, Diesel={diesel}, Gas={gas}")
+        return {"a95": a95, "diesel": diesel, "gas": gas, "station": "Авантаж 7"}
+
+    except Exception as e:
+        print("Fuel error:", e)
+        return {"a95": "—", "diesel": "—", "gas": "—", "station": "Авантаж 7"}
 
 def get_alert():
     try:
