@@ -86,6 +86,7 @@ def get_fuel():
         row = soup.find("a", string="Авантаж 7")
         if row:
             cells = row.find_parent("tr").find_all("td")
+            print("Fuel cells:", [c.text.strip() for c in cells])
             # А-95, Дизель, Газ
             a95    = cells[2].text.strip() if len(cells) > 2 else "—"
             diesel = cells[4].text.strip() if len(cells) > 4 else "—"
