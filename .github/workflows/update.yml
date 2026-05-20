@@ -14,7 +14,6 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install dependencies
-        run: pip install requests pillow
         run: pip install requests pillow beautifulsoup4
       - name: Run script
         run: python update_bot.py
