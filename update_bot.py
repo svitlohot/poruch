@@ -88,9 +88,9 @@ def get_fuel():
             cells = row.find_parent("tr").find_all("td")
             print("Fuel cells:", [c.text.strip() for c in cells])
             # А-95, Дизель, Газ
-            a95    = cells[2].text.strip() if len(cells) > 2 else "—"
-            diesel = cells[4].text.strip() if len(cells) > 4 else "—"
-            gas    = cells[5].text.strip() if len(cells) > 5 else "—"
+            a95    = cells[3].text.strip() if len(cells) > 3 else "—"
+            diesel = cells[5].text.strip() if len(cells) > 5 else "—"
+            gas    = cells[6].text.strip() if len(cells) > 6 else "—"
         else:
             a95 = diesel = gas = "—"
 
