@@ -293,7 +293,7 @@ draw.text((R+PX, TY+S*2+200), "з урахуванням пробок",         
 fy = TY + S*3 + 16
 draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
 draw.text((50, fy+14), "Стан громади оновлюється кожні 10 хв",  fill=SUBTEXT, font=f_footer)
-draw.text((50, fy+58), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,    font=f_footer)
+draw.text((250, fy+58), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,    font=f_footer)
 draw.text((960, fy+64), "v0.9", fill="#BBBBBB", font=f_small)
 
 # ============================================
