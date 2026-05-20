@@ -21,7 +21,6 @@ C_RED    = {"bg": "#FDECEA", "accent": "#E53935", "dark": "#B71C1C"}
 C_ORANGE = {"bg": "#FFF3E0", "accent": "#FB8C00", "dark": "#E65100"}
 C_BLUE   = {"bg": "#E3F0FB", "accent": "#1E88E5", "dark": "#1565C0"}
 C_YELLOW = {"bg": "#FFF8E1", "accent": "#F9A825", "dark": "#F57F17"}
-C_PURPLE = {"bg": "#F3E5F5", "accent": "#8E24AA", "dark": "#6A1B9A"}
 C_TEAL   = {"bg": "#E0F2F1", "accent": "#00897B", "dark": "#004D40"}
 
 # ============================================
@@ -44,9 +43,9 @@ def get_power():
         try:
             url = f"https://api.svitlobot.in.ua/status?channel_key={key}"
             text = requests.get(url, timeout=5).text
-            if "світло є" in text.lower():   return "Є"
+            if "світло є" in text.lower():      return "Є"
             elif "світла немає" in text.lower(): return "Немає"
-            else: return "—"
+            else:                                return "—"
         except Exception as e:
             print("Power fetch error:", e)
             return "—"
@@ -74,7 +73,7 @@ def get_air():
         return {"aqi": "—", "status": "Помилка"}
 
 def get_fuel():
-    return {"a95": "55.90", "gas": "—", "diesel": "—", "station": "Авантаж 7"}
+    return {"a95": "70.95", "gas": "44,95", "diesel": "82,85", "station": "Авантаж 7"}
 
 def get_alert():
     try:
@@ -120,17 +119,16 @@ def get_traffic():
 
 FONT_PATH = "Ubuntu-Bold.ttf"
 try:
-    f_header  = ImageFont.truetype(FONT_PATH, 72)
-    f_sub     = ImageFont.truetype(FONT_PATH, 38)
-    f_loc     = ImageFont.truetype(FONT_PATH, 30)
-    f_label   = ImageFont.truetype(FONT_PATH, 27)
-    f_big     = ImageFont.truetype(FONT_PATH, 68)
-    f_medium  = ImageFont.truetype(FONT_PATH, 36)
+    f_header  = ImageFont.truetype(FONT_PATH, 80)
+    f_sub     = ImageFont.truetype(FONT_PATH, 40)
+    f_label   = ImageFont.truetype(FONT_PATH, 28)
+    f_big     = ImageFont.truetype(FONT_PATH, 72)
+    f_medium  = ImageFont.truetype(FONT_PATH, 38)
     f_small   = ImageFont.truetype(FONT_PATH, 26)
     f_tiny    = ImageFont.truetype(FONT_PATH, 22)
-    f_footer  = ImageFont.truetype(FONT_PATH, 32)
+    f_footer  = ImageFont.truetype(FONT_PATH, 34)
 except:
-    f_header = f_sub = f_loc = f_label = f_big = f_medium = f_small = f_tiny = f_footer = ImageFont.load_default()
+    f_header = f_sub = f_label = f_big = f_medium = f_small = f_tiny = f_footer = ImageFont.load_default()
 
 # ============================================
 # CANVAS
@@ -140,92 +138,52 @@ img  = Image.new("RGB", (WIDTH, HEIGHT), BG)
 draw = ImageDraw.Draw(img)
 
 # ============================================
-# ХЕДЕР (білий фон щоб логотип зливався)
+# ХЕДЕР
 # ============================================
 
-draw.rectangle([0, 0, WIDTH, 250], fill=WHITE)
+HEADER_H = 240
+draw.rectangle([0, 0, WIDTH, HEADER_H], fill=WHITE)
 
+# Логотип
+logo_x = 40
 try:
     logo = Image.open("logo.png").convert("RGBA")
-    logo = logo.resize((170, 170), Image.LANCZOS)
-    img.paste(logo, (40, 38), logo)
-    text_x = 230
+    logo = logo.resize((180, 180), Image.LANCZOS)
+    img.paste(logo, (logo_x, 30), logo)
+    tx = 240
 except:
-    text_x = 50
+    tx = 50
 
 now = datetime.utcnow() + timedelta(hours=3)
 
-draw.text((text_x, 42),  "СТАН ГРОМАДИ", fill=TEXT,    font=f_header)
-draw.text((text_x, 128), "Хотянівка",    fill=SUBTEXT, font=f_sub)
+draw.text((tx, 35),  "СТАН ГРОМАДИ", fill=TEXT,    font=f_header)
+draw.text((tx, 128), "Хотянівка",    fill=SUBTEXT, font=f_sub)
 
-draw.text((760, 42),  "Оновлено",               fill=SUBTEXT, font=f_tiny)
-draw.text((760, 72),  now.strftime("%d.%m.%Y"), fill=TEXT,    font=f_small)
-draw.text((760, 110), now.strftime("%H:%M"),    fill=TEXT,    font=f_big)
+# Час справа
+draw.text((760, 35),  "Оновлено",               fill=SUBTEXT, font=f_tiny)
+draw.text((760, 65),  now.strftime("%d.%m.%Y"), fill=TEXT,    font=f_small)
+draw.text((760, 105), now.strftime("%H:%M"),    fill=TEXT,    font=f_big)
 
-# Розділювач
-draw.rectangle([0, 250, WIDTH, 253], fill=BORDER)
-
-# ============================================
-# ІКОНКИ (геометричні)
-# ============================================
-
-def icon_lightning(cx, cy, color):
-    # блискавка зі смужок
-    pts = [(cx, cy-28), (cx+14, cy-28), (cx-2, cy+2), (cx+10, cy+2), (cx-14, cy+28), (cx+2, cy+28), (cx, cy-28)]
-    draw.polygon(pts, fill=color)
-
-def icon_bell(cx, cy, color):
-    # дзвін = напівкруг + прямокутник
-    draw.ellipse([cx-22, cy-24, cx+22, cy+10], fill=color)
-    draw.rectangle([cx-22, cy+2, cx+22, cy+14], fill=color)
-    draw.ellipse([cx-8, cy+12, cx+8, cy+22], fill=color)
-
-def icon_dollar(cx, cy, color):
-    draw.ellipse([cx-22, cy-22, cx+22, cy+22], fill=color)
-    draw.text((cx-8, cy-16), "$", fill=WHITE, font=f_medium)
-
-def icon_fuel(cx, cy, color):
-    draw.rectangle([cx-18, cy-22, cx+12, cy+22], fill=color)
-    draw.rectangle([cx+8, cy-14, cx+22, cy+4], fill=color)
-    draw.ellipse([cx+14, cy-18, cx+24, cy-8], fill=color)
-
-def icon_wind(cx, cy, color):
-    for i, y_off in enumerate([-10, 0, 10]):
-        w = 30 if i == 1 else 20
-        draw.rectangle([cx-w, cy+y_off-3, cx+w, cy+y_off+3], fill=color)
-        draw.ellipse([cx+w-6, cy+y_off-6, cx+w+6, cy+y_off+6], fill=color)
-
-def icon_car(cx, cy, color):
-    draw.rectangle([cx-28, cy-6, cx+28, cy+14], fill=color)
-    draw.rectangle([cx-18, cy-22, cx+18, cy-4], fill=color)
-    draw.ellipse([cx-22, cy+8, cx-8, cy+22], fill=color)
-    draw.ellipse([cx+8, cy+8, cx+22, cy+22], fill=color)
+draw.rectangle([0, HEADER_H, WIDTH, HEADER_H+3], fill=BORDER)
 
 # ============================================
 # КАРТКИ
 # ============================================
 
-L  = 38
-R  = 558
-TY = 270
-S  = 285
-CW = 494
-CH = 262
-PX = 140   # текст починається після іконки
-PY = 22
+L   = 38
+R   = 560
+TY  = HEADER_H + 25
+S   = 288       # крок між рядками
+CW  = 482       # ширина картки
+CH  = 258       # висота картки
+PX  = 28        # внутрішній відступ X
+PY  = 20        # внутрішній відступ Y зверху
 
-def draw_card_base(x, y, w, h, theme):
-    draw.rounded_rectangle([x, y, x+w, y+h], radius=28, fill=theme["bg"], outline=BORDER, width=2)
+def draw_card(x, y, theme):
+    draw.rounded_rectangle([x, y, x+CW, y+CH], radius=28, fill=theme["bg"], outline=BORDER, width=2)
 
-def draw_dot(x, y, r, color):
-    draw.ellipse([x-r, y-r, x+r, y+r], fill=color)
-
-# ---- ІКОНКА + ПІДКЛАДКА ----
-def card_icon_bg(x, y, theme, icon_fn):
-    cx = x + 72
-    cy = y + CH // 2
-    draw.ellipse([cx-44, cy-44, cx+44, cy+44], fill=theme["accent"])
-    icon_fn(cx, cy, WHITE)
+def draw_dot(x, y, color):
+    draw.ellipse([x-10, y-10, x+10, y+10], fill=color)
 
 # ============================================
 # ДАНІ
@@ -248,70 +206,60 @@ both_on = s1_on and s2_on
 any_on  = s1_on or s2_on
 
 if both_on:
-    theme_p = C_GREEN
-    power_summary = "Світло скрізь є"
+    tp = C_GREEN;  power_summary = "Світло скрізь є"
 elif any_on:
-    theme_p = C_ORANGE
-    power_summary = "Частково є"
+    tp = C_ORANGE; power_summary = "Частково є"
 else:
-    theme_p = C_RED
-    power_summary = "Світла немає"
+    tp = C_RED;    power_summary = "Світла немає"
 
-draw_card_base(L, TY, CW, CH, theme_p)
-card_icon_bg(L, TY, theme_p, icon_lightning)
-
-draw.text((L+PX, TY+PY),    "СВІТЛО",       fill=theme_p["dark"], font=f_label)
+draw_card(L, TY, tp)
+draw.text((L+PX, TY+PY), "СВІТЛО", fill=tp["dark"], font=f_label)
 
 dot1 = C_GREEN["accent"] if s1_on else C_RED["accent"]
-draw_dot(L+PX, TY+80, 9, dot1)
-draw.text((L+PX+18, TY+68), f"Хотянівка: {power['hotyanivka']}", fill=theme_p["dark"], font=f_medium)
+draw_dot(L+PX+10, TY+90, dot1)
+draw.text((L+PX+30, TY+77), f"Хотянівка: {power['hotyanivka']}", fill=tp["dark"], font=f_medium)
 
 dot2 = C_GREEN["accent"] if s2_on else C_RED["accent"]
-draw_dot(L+PX, TY+128, 9, dot2)
-draw.text((L+PX+18, TY+116), f"ПБХ/Осещина: {power['pbkh']}", fill=theme_p["dark"], font=f_medium)
+draw_dot(L+PX+10, TY+140, dot2)
+draw.text((L+PX+30, TY+127), f"ПБХ/Осещина: {power['pbkh']}", fill=tp["dark"], font=f_medium)
 
-draw.text((L+PX, TY+178), power_summary, fill=theme_p["accent"], font=f_small)
+draw.text((L+PX, TY+195), power_summary, fill=tp["accent"], font=f_small)
 
 # ============================================
 # 2. ТРИВОГА
 # ============================================
 
-theme_a = C_RED if alert["active"] else C_GREEN
-draw_card_base(R, TY, CW, CH, theme_a)
-card_icon_bg(R, TY, theme_a, icon_bell)
+ta = C_RED if alert["active"] else C_GREEN
+draw_card(R, TY, ta)
+draw.text((R+PX, TY+PY), "ТРИВОГА", fill=ta["dark"], font=f_label)
 
-draw.text((R+PX, TY+PY),   "ТРИВОГА", fill=theme_a["dark"], font=f_label)
 alert_val = "ТРИВОГА" if alert["active"] else "НЕМАЄ"
-draw.text((R+PX, TY+65),   alert_val,  fill=theme_a["dark"], font=f_big)
+draw.text((R+PX, TY+65), alert_val, fill=ta["dark"], font=f_big)
 
-dot_alert = C_RED["accent"] if alert["active"] else C_GREEN["accent"]
-draw_dot(R+PX, TY+200, 9, dot_alert)
-draw.text((R+PX+18, TY+190), "Вишгородський р-н", fill=theme_a["dark"], font=f_small)
+dot_a = C_RED["accent"] if alert["active"] else C_GREEN["accent"]
+draw_dot(R+PX+10, TY+205, dot_a)
+draw.text((R+PX+28, TY+193), "Вишгородський р-н", fill=ta["dark"], font=f_small)
 
 # ============================================
 # 3. КУРС ВАЛЮТ
 # ============================================
 
-draw_card_base(L, TY+S, CW, CH, C_BLUE)
-card_icon_bg(L, TY+S, C_BLUE, icon_dollar)
-
-draw.text((L+PX, TY+S+PY),   "КУРС ВАЛЮТ",           fill=C_BLUE["dark"],   font=f_label)
-draw.text((L+PX, TY+S+62),   f"USD {currency['usd']}", fill=C_BLUE["dark"],   font=f_big)
-draw.text((L+PX, TY+S+148),  f"EUR  {currency['eur']}", fill=C_BLUE["accent"], font=f_medium)
-draw.text((L+PX, TY+S+198),  "Приватбанк, курс продажу", fill=C_BLUE["accent"], font=f_tiny)
+draw_card(L, TY+S, C_BLUE)
+draw.text((L+PX, TY+S+PY),  "КУРС ВАЛЮТ",              fill=C_BLUE["dark"],   font=f_label)
+draw.text((L+PX, TY+S+62),  f"USD {currency['usd']}",  fill=C_BLUE["dark"],   font=f_big)
+draw.text((L+PX, TY+S+150), f"EUR  {currency['eur']}", fill=C_BLUE["accent"], font=f_medium)
+draw.text((L+PX, TY+S+205), "Приватбанк, курс продажу", fill=C_BLUE["accent"], font=f_tiny)
 
 # ============================================
 # 4. ПАЛИВО
 # ============================================
 
-draw_card_base(R, TY+S, CW, CH, C_YELLOW)
-card_icon_bg(R, TY+S, C_YELLOW, icon_fuel)
-
-draw.text((R+PX, TY+S+PY),  "ПАЛИВО · " + fuel["station"], fill=C_YELLOW["dark"], font=f_label)
-draw.text((R+PX, TY+S+58),  "А-95", fill=C_YELLOW["dark"],   font=f_medium)
-draw.text((R+PX+120, TY+S+55), f"{fuel['a95']}", fill=C_YELLOW["accent"], font=f_big)
-draw.text((R+PX, TY+S+138), f"Газ: {fuel['gas']}  Дизель: {fuel['diesel']}", fill=C_YELLOW["dark"], font=f_small)
-draw.text((R+PX, TY+S+198), "грн/літр", fill=C_YELLOW["accent"], font=f_tiny)
+draw_card(R, TY+S, C_YELLOW)
+draw.text((R+PX, TY+S+PY),  f"ПАЛИВО · {fuel['station']}", fill=C_YELLOW["dark"],   font=f_label)
+draw.text((R+PX, TY+S+62),  "А-95",                        fill=C_YELLOW["dark"],   font=f_medium)
+draw.text((R+PX+140, TY+S+55), f"{fuel['a95']}",           fill=C_YELLOW["accent"], font=f_big)
+draw.text((R+PX, TY+S+150), f"Газ: {fuel['gas']}   Дизель: {fuel['diesel']}", fill=C_YELLOW["dark"], font=f_small)
+draw.text((R+PX, TY+S+205), "грн/літр",                    fill=C_YELLOW["accent"], font=f_tiny)
 
 # ============================================
 # 5. ПОВІТРЯ
@@ -319,44 +267,40 @@ draw.text((R+PX, TY+S+198), "грн/літр", fill=C_YELLOW["accent"], font=f_t
 
 aqi_val = air["aqi"]
 if isinstance(aqi_val, int):
-    if aqi_val <= 40:   theme_air = C_GREEN
-    elif aqi_val <= 80: theme_air = C_ORANGE
-    else:               theme_air = C_RED
+    if aqi_val <= 40:   ta_air = C_GREEN
+    elif aqi_val <= 80: ta_air = C_ORANGE
+    else:               ta_air = C_RED
 else:
-    theme_air = C_TEAL
+    ta_air = C_TEAL
 
-draw_card_base(L, TY+S*2, CW, CH, theme_air)
-card_icon_bg(L, TY+S*2, theme_air, icon_wind)
-
-draw.text((L+PX, TY+S*2+PY),   "ПОВІТРЯ · Хотянівка",  fill=theme_air["dark"],   font=f_label)
-draw.text((L+PX, TY+S*2+62),   f"AQI {aqi_val}",       fill=theme_air["dark"],   font=f_big)
-draw.text((L+PX, TY+S*2+148),  air["status"],           fill=theme_air["accent"], font=f_medium)
-draw.text((L+PX, TY+S*2+198),  "European AQI",          fill=theme_air["accent"], font=f_tiny)
+draw_card(L, TY+S*2, ta_air)
+draw.text((L+PX, TY+S*2+PY),  "ПОВІТРЯ · Хотянівка", fill=ta_air["dark"],   font=f_label)
+draw.text((L+PX, TY+S*2+62),  f"AQI {aqi_val}",      fill=ta_air["dark"],   font=f_big)
+draw.text((L+PX, TY+S*2+150), air["status"],          fill=ta_air["accent"], font=f_medium)
+draw.text((L+PX, TY+S*2+205), "European AQI",         fill=ta_air["accent"], font=f_tiny)
 
 # ============================================
 # 6. ДО КИЄВА
 # ============================================
 
 delay_themes = {"Вільно": C_GREEN, "Помірно": C_ORANGE, "Затори": C_RED, "Стоїмо": C_RED}
-theme_t = delay_themes.get(traffic["delay"], C_PURPLE)
+tt = delay_themes.get(traffic["delay"], C_TEAL)
 
-draw_card_base(R, TY+S*2, CW, CH, theme_t)
-card_icon_bg(R, TY+S*2, theme_t, icon_car)
-
-draw.text((R+PX, TY+S*2+PY),  "ДО КИЄВА · м. Героїв Дніпра", fill=theme_t["dark"],   font=f_label)
-draw.text((R+PX, TY+S*2+62),  traffic["time"],                 fill=theme_t["dark"],   font=f_big)
-draw.text((R+PX, TY+S*2+148), traffic["delay"],                fill=theme_t["accent"], font=f_big)
-draw.text((R+PX, TY+S*2+218), "з урахуванням пробок",         fill=theme_t["accent"], font=f_tiny)
+draw_card(R, TY+S*2, tt)
+draw.text((R+PX, TY+S*2+PY),  "ДО КИЄВА · м. Героїв Дніпра", fill=tt["dark"],   font=f_label)
+draw.text((R+PX, TY+S*2+62),  traffic["time"],                 fill=tt["dark"],   font=f_big)
+draw.text((R+PX, TY+S*2+150), traffic["delay"],                fill=tt["accent"], font=f_medium)
+draw.text((R+PX, TY+S*2+205), "з урахуванням пробок",         fill=tt["accent"], font=f_tiny)
 
 # ============================================
 # ФУТЕР
 # ============================================
 
-fy = TY + S*3 + 15
+fy = TY + S*3 + 18
 draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
-draw.text((50, fy+18), "Стан громади оновлюється кожні 10 хв", fill=SUBTEXT,   font=f_small)
-draw.text((50, fy+55), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,      font=f_footer)
-draw.text((970, fy+62), "v0.7", fill="#BBBBBB", font=f_tiny)
+draw.text((50, fy+16), "Стан громади оновлюється кожні 10 хв",  fill=SUBTEXT, font=f_small)
+draw.text((50, fy+52), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT,    font=f_footer)
+draw.text((970, fy+58), "v0.8", fill="#BBBBBB", font=f_tiny)
 
 # ============================================
 # SAVE
