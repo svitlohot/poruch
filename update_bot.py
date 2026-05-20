@@ -99,7 +99,8 @@ def get_air():
         return {"aqi": aqi, "status": status}
 
     except Exception as e:
-        print(
+        print("Air error:", e)
+        return {"aqi": "—", "status": "Помилка"}
 
 def get_fuel():
     return {"a95": "55.90", "gas": "—", "diesel": "—", "station": "Авантаж 7"}
