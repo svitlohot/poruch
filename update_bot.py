@@ -239,7 +239,7 @@ try:
     f_header = ImageFont.truetype(FONT_PATH, 72)
     f_sub    = ImageFont.truetype(FONT_PATH, 36)
     f_label  = ImageFont.truetype(FONT_PATH, 26)
-    f_big    = ImageFont.truetype(FONT_PATH, 62)
+    f_big    = ImageFont.truetype(FONT_PATH, 56)
     f_medium = ImageFont.truetype(FONT_PATH, 36)
     f_small  = ImageFont.truetype(FONT_PATH, 24)
     f_tiny   = ImageFont.truetype(FONT_PATH, 20)
