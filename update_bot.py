@@ -313,7 +313,7 @@ def label(x, y, text, color, font=None):
 
 def label_with_emoji(x, y, emoji, text, color):
     if has_emoji:
-        draw.text((x, y), emoji, font=f_emoji_label, embedded_color=True)
+        draw.text((x, y), emoji, font=f_emoji_label, fill=color)
         ex = x + int(draw.textlength(emoji, font=f_emoji_label)) + 8
     else:
         ex = x
