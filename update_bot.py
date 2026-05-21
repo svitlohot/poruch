@@ -416,13 +416,28 @@ if w["warning"] and w["warning_level"]:
 
     draw_card(R, TY+S*2, CW, CH, tw)
     label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень", tw["dark"])
+    t_small(R+PX, TY+S*2+55, w.get("warning_date", ""), tw["dark"])
+    t_med(R+PX, TY+S*2+85, w["warning"][:45], tw["dark"])
+    if len(w["warning"]) > 45:
+    t_med(R+PX, TY+S*2+125, w["warning"][45:90], tw["dark"])
 
     # Скорочуємо текст попередження до двох рядків
     warn_text = w["warning"]
     # Видаляємо дату з початку якщо є
     import re
-    warn_text = re.sub(r"^[А-Яа-яІіЇїЄє\s\d]+\d{1,2}\s\w+\s", "", warn_text)
-    warn_text = warn_text[:120]  # обрізаємо
+    # Витягуємо тільки явище після "областях" або "районах"
+    match = re.search(r'областях?\s+(.*?)(?:\s*\(|$)', warn_text, re.DOTALL)
+    if match:
+        phenomenon = match.group(1).strip().rstrip(".")
+    else:
+        phenomenon = warn_text[:80]
+
+    # Дата з початку тексту
+    date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
+    date_str = date_match.group(1) if date_match else ""
+
+    warning = phenomenon
+    warning_date = date_str
 
     # Ділимо на два рядки по ~40 символів
     if len(warn_text) > 40:
