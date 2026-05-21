@@ -201,7 +201,7 @@ def get_weather():
             headers_h5 = soup.find_all("h5")
             for h in headers_h5:
                 text = h.text.strip()
-                if "Київська" in text or "всі області" in text.lower():
+                if "Вінницька" in text or "всі області" in text.lower():
                     warning = text
                     # Визначаємо рівень
                     if "III рівень" in text or "червоний" in text:
