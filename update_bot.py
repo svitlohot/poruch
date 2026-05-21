@@ -132,6 +132,7 @@ def get_traffic():
 
         def parse_leg(row_idx, el_idx, label):
             el = data["rows"][row_idx]["elements"][el_idx]
+            print(f"Traffic {label} raw: {el}")
             if el["status"] != "OK":
                 return {"time": "—", "delay": "Немає даних", "delay_min": 0}
             dur = el["duration_in_traffic"]["value"] // 60
