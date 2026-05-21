@@ -498,7 +498,8 @@ elif max_delay <= 10: tr_theme = C_ORANGE
 else:                 tr_theme = C_RED
 
 draw_card(L, ROAD_Y, ROAD_W, ROAD_H, tr_theme)
-label(L+PX, ROAD_Y+PY, "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
+label_with_emoji(L+PX, ROAD_Y+PY, "🛣️", "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
+
 
 # Ліва — З Києва
 t_small(L+PX, ROAD_Y+62,  "З Києва:",        tr_theme["dark"])
