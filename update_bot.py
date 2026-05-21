@@ -475,6 +475,7 @@ t_big(L+PX,   ROAD_Y+90,  from_k["time"],    tr_theme["dark"])
 t_med(L+PX,   ROAD_Y+175, from_k["delay"],   tr_theme["accent"])
 
 # Права — До Києва
+RX = L + ROAD_W // 2 + 20
 t_small(RX, ROAD_Y+62,  "До Києва:",       tr_theme["dark"])
 t_big(RX,   ROAD_Y+90,  to_k["time"],      tr_theme["dark"])
 t_med(RX,   ROAD_Y+175, to_k["delay"],     tr_theme["accent"])
