@@ -145,8 +145,8 @@ def get_traffic():
             print(f"Traffic {label}: {dur} хв, {txt}")
             return {"time": f"{dur} хв", "delay": txt, "delay_min": delay}
 
-        to_kyiv   = parse_leg(0, 1, "До Києва")
-        from_kyiv = parse_leg(1, 0, "З Києва")
+        to_kyiv   = parse_leg(0, 0, "До Києва")
+        from_kyiv = parse_leg(1, 1, "З Києва")
         return {"to": to_kyiv, "from": from_kyiv}
 
     except Exception as e:
