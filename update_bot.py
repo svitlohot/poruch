@@ -410,26 +410,47 @@ t_med(L+PX, TY+S*2+145, air["status"],    ta_air["accent"])
 w = weather
 if w["warning"] and w["warning_level"]:
     import re
-    # Витягуємо тільки явище після "областях" або "районах"
+
     warn_text = w["warning"]
+
+    # Витягуємо дату з оригінального тексту
+    date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
+    date_str = f"· {date_match.group(1)}" if date_match else ""
+
+    # Витягуємо тільки явище після "областях" або "районах"
     for keyword in ["областях ", "районах "]:
         idx = warn_text.rfind(keyword)
         if idx != -1:
             warn_text = warn_text[idx + len(keyword):]
             break
+
     # Видаляємо дужки з рівнем небезпечності
     warn_text = re.sub(r'\([^)]*рівень[^)]*\)', '', warn_text).strip().rstrip(".")
+
+    # Розбиваємо по словах на рядки до 38 символів
+    words = warn_text.split()
+    lines = []
+    current = ""
+    for word in words:
+        if len((current + " " + word).strip()) <= 38:
+            current = (current + " " + word).strip()
+        else:
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
 
     level_colors = {"I": C_YELLOW, "II": C_ORANGE, "III": C_RED}
     tw = level_colors.get(w["warning_level"], C_YELLOW)
 
     draw_card(R, TY+S*2, CW, CH, tw)
-    label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень", tw["dark"])
-    t_small(R+PX, TY+S*2+58,  warn_text[:50],   tw["dark"])
-    t_small(R+PX, TY+S*2+88,  warn_text[50:100], tw["dark"])
-    t_small(R+PX, TY+S*2+118, warn_text[100:150], tw["dark"])
+    label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень {date_str}", tw["dark"])
+
+    for i, line in enumerate(lines[:3]):
+        t_small(R+PX, TY+S*2+58 + i*34, line, tw["dark"])
+
     if w["wind"] > 0:
-        t_med(R+PX, TY+S*2+165, f"Вітер {w['wind']} м/с", tw["dark"])
+        t_med(R+PX, TY+S*2+175, f"Вітер {w['wind']} м/с", tw["dark"])
 
 else:
     # Звичайна погода
