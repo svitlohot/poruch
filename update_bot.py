@@ -417,9 +417,11 @@ if w["warning"] and w["warning_level"]:
     draw_card(R, TY+S*2, CW, CH, tw)
     label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень", tw["dark"])
     t_small(R+PX, TY+S*2+55, w.get("warning_date", ""), tw["dark"])
-    t_med(R+PX, TY+S*2+85, w["warning"][:45], tw["dark"])
-    if len(w["warning"]) > 45:
-    t_med(R+PX, TY+S*2+125, w["warning"][45:90], tw["dark"])
+    warn_short = w["warning"]
+    t_med(R+PX, TY+S*2+85, warn_short[:45], tw["dark"])
+    t_med(R+PX, TY+S*2+125, warn_short[45:90], tw["dark"])
+    if w["wind"] > 0:
+        t_med(R+PX, TY+S*2+175, f"Вітер {w['wind']} м/с", tw["dark"])
 
     # Скорочуємо текст попередження до двох рядків
     warn_text = w["warning"]
