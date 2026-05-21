@@ -201,7 +201,7 @@ def get_weather():
             headers_h5 = soup.find_all("h5")
             for h in headers_h5:
                 text = h.text.strip()
-                keywords = ["Вінницьк", "всі област", "по всій"]
+                keywords = ["Київськ", "всі област", "по всій"]
                 if any(k in text for k in keywords):
                     warning = text
                     # Визначаємо рівень
