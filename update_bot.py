@@ -311,6 +311,14 @@ def draw_dot(x, y, color):
 def label(x, y, text, color, font=None):
     draw.text((x, y), text, fill=color, font=font or f_label)
 
+def label_with_emoji(x, y, emoji, text, color):
+    if has_emoji:
+        draw.text((x, y), emoji, font=f_emoji_label, embedded_color=True)
+        ex = x + int(draw.textlength(emoji, font=f_emoji_label)) + 8
+    else:
+        ex = x
+    draw.text((ex, y), text, fill=color, font=f_label)
+
 def t_big(x, y, text, color):
     draw.text((x, y), text, fill=color, font=f_big)
 
@@ -346,7 +354,7 @@ elif any_on:   tp = C_ORANGE; power_summary = "Частково є"
 else:          tp = C_RED;    power_summary = "Світла немає"
 
 draw_card(L, TY, CW, CH, tp)
-label(L+PX, TY+PY, "СВІТЛО", tp["dark"])
+label_with_emoji(L+PX, TY+PY, "⚡", "СВІТЛО", tp["dark"])
 
 draw_dot(L+PX+10, TY+82, C_GREEN["accent"] if s1_on else C_RED["accent"])
 t_med(L+PX+28, TY+70, f"Хотянівка: {power['hotyanivka']}", tp["dark"])
@@ -362,7 +370,7 @@ t_small(L+PX, TY+192, power_summary, tp["accent"])
 
 ta = C_RED if alert["active"] else C_GREEN
 draw_card(R, TY, CW, CH, ta)
-label(R+PX, TY+PY, "ТРИВОГА", ta["dark"])
+label_with_emoji(R+PX, TY+PY, "🚨", "ТРИВОГА", ta["dark"])
 t_big(R+PX, TY+58, "ТРИВОГА" if alert["active"] else "НЕМАЄ", ta["dark"])
 draw_dot(R+PX+10, TY+205, C_RED["accent"] if alert["active"] else C_GREEN["accent"])
 t_small(R+PX+28, TY+193, "Вишгородський р-н", ta["dark"])
@@ -372,7 +380,7 @@ t_small(R+PX+28, TY+193, "Вишгородський р-н", ta["dark"])
 # ============================================
 
 draw_card(L, TY+S, CW, CH, C_BLUE)
-label(L+PX, TY+S+PY, "КУРС ВАЛЮТ", C_BLUE["dark"])
+label_with_emoji(L+PX, TY+S+PY, "💵", "КУРС ВАЛЮТ", C_BLUE["dark"])
 t_big(L+PX, TY+S+58,  f"USD {currency['usd_buy']} / {currency['usd_sale']}", C_BLUE["dark"])
 t_med(L+PX, TY+S+145, f"EUR {currency['eur_buy']} / {currency['eur_sale']}", C_BLUE["accent"])
 t_small(L+PX, TY+S+200, "купівля / продаж", C_BLUE["accent"])
@@ -382,7 +390,7 @@ t_small(L+PX, TY+S+200, "купівля / продаж", C_BLUE["accent"])
 # ============================================
 
 draw_card(R, TY+S, CW, CH, C_YELLOW)
-label(R+PX, TY+S+PY, f"ПАЛИВО · {fuel['station']}", C_YELLOW["dark"])
+label_with_emoji(R+PX, TY+S+PY, "⛽", f"ПАЛИВО · {fuel['station']}", C_YELLOW["dark"])
 t_big(R+PX, TY+S+58,  f"А-95  {fuel['a95']}", C_YELLOW["dark"])
 t_med(R+PX, TY+S+145, f"Газ: {fuel['gas']}   Диз: {fuel['diesel']}", C_YELLOW["dark"])
 t_small(R+PX, TY+S+200, "грн/літр", C_YELLOW["accent"])
@@ -400,7 +408,7 @@ else:
     ta_air = C_TEAL
 
 draw_card(L, TY+S*2, CW, CH, ta_air)
-label(L+PX, TY+S*2+PY, "ЯКІСТЬ ПОВІТРЯ · Хотянівка", ta_air["dark"])
+label_with_emoji(L+PX, TY+S*2+PY, "🌿", "ЯКІСТЬ ПОВІТРЯ · Хотянівка", ta_air["dark"])
 t_big(L+PX, TY+S*2+58,  f"AQI {aqi_val}", ta_air["dark"])
 t_med(L+PX, TY+S*2+145, air["status"],    ta_air["accent"])
 
@@ -452,7 +460,7 @@ if w["warning"] and w["warning_level"]:
     tw = level_colors.get(w["warning_level"], C_YELLOW)
 
     draw_card(R, TY+S*2, CW, CH, tw)
-    label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень {date_str}", tw["dark"])
+    label_with_emoji(R+PX, TY+S*2+PY, "⛈", f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень {date_str}", tw["dark"])
 
     for i, line in enumerate(lines[:3]):
         t_small(R+PX, TY+S*2+58 + i*34, line, tw["dark"])
@@ -463,7 +471,7 @@ if w["warning"] and w["warning_level"]:
 else:
     # Звичайна погода
     draw_card(R, TY+S*2, CW, CH, C_TEAL)
-    label(R+PX, TY+S*2+PY, "ПОГОДА · Хотянівка", C_TEAL["dark"])
+    label_with_emoji(R+PX, TY+S*2+PY, "🌤", "ПОГОДА · Хотянівка", C_TEAL["dark"])
     t_big(R+PX, TY+S*2+58,  f"+{w['temp']}°", C_TEAL["dark"])
     t_med(R+PX, TY+S*2+145, w["desc"],         C_TEAL["accent"])
     if w["wind"] > 0:
