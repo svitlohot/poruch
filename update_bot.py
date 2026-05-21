@@ -130,8 +130,8 @@ def get_traffic():
         )
         data = requests.get(url, timeout=5).json()
 
-        def parse_leg(row_idx, label):
-            el = data["rows"][row_idx]["elements"][0]
+        def parse_leg(row_idx, el_idx, label):
+            el = data["rows"][row_idx]["elements"][el_idx]
             if el["status"] != "OK":
                 return {"time": "—", "delay": "Немає даних", "delay_min": 0}
             dur = el["duration_in_traffic"]["value"] // 60
@@ -144,8 +144,8 @@ def get_traffic():
             print(f"Traffic {label}: {dur} хв, {txt}")
             return {"time": f"{dur} хв", "delay": txt, "delay_min": delay}
 
-        to_kyiv   = parse_leg(0, "До Києва")
-        from_kyiv = parse_leg(1, "З Києва")
+        to_kyiv   = parse_leg(0, 1, "До Києва")
+        from_kyiv = parse_leg(1, 0, "З Києва")
         return {"to": to_kyiv, "from": from_kyiv}
 
     except Exception as e:
@@ -238,7 +238,7 @@ try:
     f_header = ImageFont.truetype(FONT_PATH, 72)
     f_sub    = ImageFont.truetype(FONT_PATH, 36)
     f_label  = ImageFont.truetype(FONT_PATH, 26)
-    f_big    = ImageFont.truetype(FONT_PATH, 68)
+    f_big    = ImageFont.truetype(FONT_PATH, 62)
     f_medium = ImageFont.truetype(FONT_PATH, 36)
     f_small  = ImageFont.truetype(FONT_PATH, 24)
     f_tiny   = ImageFont.truetype(FONT_PATH, 20)
@@ -469,16 +469,15 @@ else:                 tr_theme = C_RED
 draw_card(L, ROAD_Y, ROAD_W, ROAD_H, tr_theme)
 label(L+PX, ROAD_Y+PY, "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
 
-# Ліва частина — До Києва
-t_small(L+PX,     ROAD_Y+62,  "До Києва:",      tr_theme["dark"])
-t_big(L+PX,       ROAD_Y+90,  to_k["time"],     tr_theme["dark"])
-t_med(L+PX,       ROAD_Y+175, to_k["delay"],    tr_theme["accent"])
+# Ліва — З Києва
+t_small(L+PX, ROAD_Y+62,  "З Києва:",        tr_theme["dark"])
+t_big(L+PX,   ROAD_Y+90,  from_k["time"],    tr_theme["dark"])
+t_med(L+PX,   ROAD_Y+175, from_k["delay"],   tr_theme["accent"])
 
-# Права частина — З Києва (right-aligned)
-RX = L + ROAD_W // 2 + 20
-t_small(RX, ROAD_Y+62,  "З Києва:",         tr_theme["dark"])
-t_big(RX,   ROAD_Y+90,  from_k["time"],     tr_theme["dark"])
-t_med(RX,   ROAD_Y+175, from_k["delay"],    tr_theme["accent"])
+# Права — До Києва
+t_small(RX, ROAD_Y+62,  "До Києва:",       tr_theme["dark"])
+t_big(RX,   ROAD_Y+90,  to_k["time"],      tr_theme["dark"])
+t_med(RX,   ROAD_Y+175, to_k["delay"],     tr_theme["accent"])
 
 # Вертикальний розділювач
 MID_X = L + ROAD_W // 2
