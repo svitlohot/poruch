@@ -407,54 +407,29 @@ t_med(L+PX, TY+S*2+145, air["status"],    ta_air["accent"])
 # ============================================
 # 6. ПОГОДА / ПОПЕРЕДЖЕННЯ
 # ============================================
-
 w = weather
 if w["warning"] and w["warning_level"]:
-    # Є попередження
+    import re
+    # Витягуємо тільки явище після "областях" або "районах"
+    warn_text = w["warning"]
+    for keyword in ["областях ", "районах "]:
+        idx = warn_text.rfind(keyword)
+        if idx != -1:
+            warn_text = warn_text[idx + len(keyword):]
+            break
+    # Видаляємо дужки з рівнем небезпечності
+    warn_text = re.sub(r'\([^)]*рівень[^)]*\)', '', warn_text).strip().rstrip(".")
+
     level_colors = {"I": C_YELLOW, "II": C_ORANGE, "III": C_RED}
     tw = level_colors.get(w["warning_level"], C_YELLOW)
 
     draw_card(R, TY+S*2, CW, CH, tw)
     label(R+PX, TY+S*2+PY, f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень", tw["dark"])
-    t_small(R+PX, TY+S*2+55, w.get("warning_date", ""), tw["dark"])
-    warn_short = w["warning"]
-    t_med(R+PX, TY+S*2+85, warn_short[:45], tw["dark"])
-    t_med(R+PX, TY+S*2+125, warn_short[45:90], tw["dark"])
+    t_small(R+PX, TY+S*2+58,  warn_text[:50],   tw["dark"])
+    t_small(R+PX, TY+S*2+88,  warn_text[50:100], tw["dark"])
+    t_small(R+PX, TY+S*2+118, warn_text[100:150], tw["dark"])
     if w["wind"] > 0:
-        t_med(R+PX, TY+S*2+175, f"Вітер {w['wind']} м/с", tw["dark"])
-
-    # Скорочуємо текст попередження до двох рядків
-    warn_text = w["warning"]
-    # Видаляємо дату з початку якщо є
-    import re
-    # Витягуємо тільки явище після "областях" або "районах"
-    match = re.search(r'областях?\s+(.*?)(?:\s*\(|$)', warn_text, re.DOTALL)
-    if match:
-        phenomenon = match.group(1).strip().rstrip(".")
-    else:
-        phenomenon = warn_text[:80]
-
-    # Дата з початку тексту
-    date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
-    date_str = date_match.group(1) if date_match else ""
-
-    warning = phenomenon
-    warning_date = date_str
-
-    # Ділимо на два рядки по ~40 символів
-    if len(warn_text) > 40:
-        split = warn_text[:40].rfind(" ")
-        line1 = warn_text[:split]
-        line2 = warn_text[split+1:split+80]
-    else:
-        line1 = warn_text
-        line2 = ""
-
-    t_small(R+PX, TY+S*2+70,  line1, tw["dark"])
-    t_small(R+PX, TY+S*2+100, line2, tw["dark"])
-
-    if w["wind"] > 0:
-        t_med(R+PX, TY+S*2+145, f"Вітер {w['wind']} м/с", tw["dark"])
+        t_med(R+PX, TY+S*2+165, f"Вітер {w['wind']} м/с", tw["dark"])
 
 else:
     # Звичайна погода
