@@ -415,7 +415,15 @@ if w["warning"] and w["warning_level"]:
 
     # Витягуємо дату з оригінального тексту
     date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
-    date_str = f"· {date_match.group(1)}" if date_match else ""
+    if date_match:
+    parts = date_match.group(1).split()
+    months = {"січня":"01","лютого":"02","березня":"03","квітня":"04",
+              "травня":"05","червня":"06","липня":"07","серпня":"08",
+              "вересня":"09","жовтня":"10","листопада":"11","грудня":"12"}
+    m = months.get(parts[1], "??") if len(parts) == 2 else "??"
+    date_str = f"· {parts[0]}.{m}."
+else:
+    date_str = ""
 
     # Витягуємо тільки явище після "областях" або "районах"
     for keyword in ["областях ", "районах "]:
