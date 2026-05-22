@@ -393,7 +393,7 @@ draw_card(R, TY+S, CW, CH, C_YELLOW)
 label_with_emoji(R+PX, TY+S+PY, "⛽", f"ПАЛИВО · {fuel['station']}", C_YELLOW["dark"])
 t_big(R+PX, TY+S+58,  f"А-95  {fuel['a95']}", C_YELLOW["dark"])
 t_med(R+PX, TY+S+145, f"Газ: {fuel['gas']}   Диз: {fuel['diesel']}", C_YELLOW["dark"])
-t_small(R+PX, TY+S+200, "грн/літр", C_YELLOW["accent"])
+t_med(R+PX, TY+S+200, "грн/літр", C_YELLOW["accent"])
 
 # ============================================
 # 5. ЯКІСТЬ ПОВІТРЯ
@@ -502,13 +502,13 @@ label_with_emoji(L+PX, ROAD_Y+PY, "🚗", "ДОРОГА · м. Героїв Дн
 
 
 # Ліва — З Києва
-t_small(L+PX, ROAD_Y+62,  "З Києва:",        tr_theme["dark"])
+t_med(L+PX, ROAD_Y+62,  "З Києва:",        tr_theme["dark"])
 t_big(L+PX,   ROAD_Y+90,  from_k["time"],    tr_theme["dark"])
 t_med(L+PX,   ROAD_Y+175, from_k["delay"],   tr_theme["accent"])
 
 # Права — До Києва
 RX = L + ROAD_W // 2 + 20
-t_small(RX, ROAD_Y+62,  "До Києва:",       tr_theme["dark"])
+t_med(RX, ROAD_Y+62,  "До Києва:",       tr_theme["dark"])
 t_big(RX,   ROAD_Y+90,  to_k["time"],      tr_theme["dark"])
 t_med(RX,   ROAD_Y+175, to_k["delay"],     tr_theme["accent"])
 
