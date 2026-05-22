@@ -349,7 +349,7 @@ s2_on   = power["pbkh"] == "Є"
 both_on = s1_on and s2_on
 any_on  = s1_on or s2_on
 
-if both_on:    tp = C_GREEN;  power_summary = "Світло скрізь є"
+if both_on:    tp = C_GREEN;  power_summary = "Світло скрізь є (не враховуючи локальні аварії"
 elif any_on:   tp = C_ORANGE; power_summary = "Частково є"
 else:          tp = C_RED;    power_summary = "Світла немає"
 
