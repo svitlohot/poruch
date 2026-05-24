@@ -354,7 +354,7 @@ elif any_on:   tp = C_ORANGE; power_summary = "Частково є"
 else:          tp = C_RED;    power_summary = "Світла немає"
 
 draw_card(L, TY, CW, CH, tp)
-label_with_emoji(L+PX, TY+PY, "🌐", "ІНТЕРНЕТ (Інтерлан)", tp["dark"])
+label_with_emoji(L+PX, TY+PY, "⚡️", "СВІТЛО", tp["dark"])
 
 draw_dot(L+PX+10, TY+82, C_GREEN["accent"] if s1_on else C_RED["accent"])
 t_med(L+PX+28, TY+70, f"Хотянівка (СТ): {power['hotyanivka']}", tp["dark"])
