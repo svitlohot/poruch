@@ -1,4 +1,4 @@
-import os
+fimport os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
@@ -354,10 +354,10 @@ elif any_on:   tp = C_ORANGE; power_summary = "Частково є"
 else:          tp = C_RED;    power_summary = "Світла немає"
 
 draw_card(L, TY, CW, CH, tp)
-label_with_emoji(L+PX, TY+PY, "⚡", "СВІТЛО", tp["dark"])
+label_with_emoji(L+PX, TY+PY, "🌐", "ІНТЕРНЕТ (Інтерлан)", tp["dark"])
 
 draw_dot(L+PX+10, TY+82, C_GREEN["accent"] if s1_on else C_RED["accent"])
-t_med(L+PX+28, TY+70, f"Хотянівка: {power['hotyanivka']}", tp["dark"])
+t_med(L+PX+28, TY+70, f"Хотянівка (СТ): {power['hotyanivka']}", tp["dark"])
 
 draw_dot(L+PX+10, TY+130, C_GREEN["accent"] if s2_on else C_RED["accent"])
 t_med(L+PX+28, TY+118, f"ПБХ/Осещина/МР: {power['pbkh']}", tp["dark"])
