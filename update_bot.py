@@ -59,7 +59,7 @@ def get_power():
     key2 = os.environ.get("SVITLO_KEY2", "")
     s1 = fetch_status(key1) if key1 else "—"
     s2 = fetch_status(key2) if key2 else "—"
-    print(f"Power: Хотянівка={s1}, ПБХ/Осещина/МР={s2}")
+    print(f"Power: Хотянівка={s1}, ПБХ/Центр={s2}")
     return {"hotyanivka": s1, "pbkh": s2}
 
 
@@ -360,7 +360,7 @@ draw_dot(L+PX+10, TY+82, C_GREEN["accent"] if s1_on else C_RED["accent"])
 t_med(L+PX+28, TY+70, f"Хотянівка (СТ): {power['hotyanivka']}", tp["dark"])
 
 draw_dot(L+PX+10, TY+130, C_GREEN["accent"] if s2_on else C_RED["accent"])
-t_med(L+PX+28, TY+118, f"ПБХ/Осещина/МР: {power['pbkh']}", tp["dark"])
+t_med(L+PX+28, TY+118, f"ПБХ/Центр: {power['pbkh']}", tp["dark"])
 
 t_small(L+PX, TY+192, power_summary, tp["accent"])
 
