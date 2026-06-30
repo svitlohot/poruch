@@ -65,16 +65,44 @@ def get_power():
 
 def get_air():
     try:
-        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.5486&longitude=30.4197&current=european_aqi"
-        data = requests.get(url, timeout=5).json()
-        aqi = int(data["current"]["european_aqi"])
-        if aqi <= 20:   status = "Чудова якість"
-        elif aqi <= 40: status = "Хороша якість"
-        elif aqi <= 60: status = "Помірна якість"
-        elif aqi <= 80: status = "Погана якість"
-        else:           status = "Небезпечно"
+        key = os.environ.get("GOOGLE_MAPS_KEY", "")
+        url = "https://airquality.googleapis.com/v1/currentConditions:lookup"
+        payload = {
+            "location": {"latitude": 50.5486, "longitude": 30.4197},
+            "languageCode": "uk"
+        }
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(
+            f"{url}?key={key}",
+            json=payload,
+            headers=headers,
+            timeout=5
+        )
+        data = response.json()
+
+        aqi_info = next(
+            (i for i in data.get("indexes", []) if i.get("code") == "uaqi"),
+            None
+        )
+        if not aqi_info:
+            raise ValueError("No AQI data")
+
+        aqi = aqi_info.get("aqiDisplay", "—")
+        category = aqi_info.get("category", "")
+
+        translations = {
+            "Excellent air quality": "Чудова якість",
+            "Good air quality": "Хороша якість",
+            "Moderate air quality": "Помірна якість",
+            "Low air quality": "Погана якість",
+            "Poor air quality": "Дуже погано",
+            "Hazardous air quality": "Небезпечно",
+        }
+        status = translations.get(category, category)
+
         print(f"Air: AQI={aqi}, {status}")
         return {"aqi": aqi, "status": status}
+
     except Exception as e:
         print("Air error:", e)
         return {"aqi": "—", "status": "Помилка"}
