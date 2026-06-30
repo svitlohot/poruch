@@ -65,9 +65,11 @@ def get_power():
 
 def get_air():
     try:
-        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.5486&longitude=30.4197&current=us_aqi"
-        data = requests.get(url, timeout=5).json()
-        aqi = int(data["current"]["us_aqi"])
+        url = "https://www.saveecobot.com/station/24765.json"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        data = requests.get(url, headers=headers, timeout=10).json()
+
+        aqi = int(data["aqi"])
 
         if aqi <= 50:    status = "Добра якість"
         elif aqi <= 100: status = "Помірна якість"
@@ -76,12 +78,12 @@ def get_air():
         elif aqi <= 300: status = "Дуже шкідливо"
         else:            status = "Небезпечно"
 
-        print(f"Air: US AQI={aqi}, {status}")
+        print(f"Air (SaveEcoBot): AQI={aqi}, {status}")
         return {"aqi": aqi, "status": status}
+
     except Exception as e:
         print("Air error:", e)
         return {"aqi": "—", "status": "Помилка"}
-
 
 def get_fuel():
     try:
@@ -411,7 +413,7 @@ else:
     ta_air = C_TEAL
 
 draw_card(L, TY+S*2, CW, CH, ta_air)
-label_with_emoji(L+PX, TY+S*2+PY, "🌿", "ЯКІСТЬ ПОВІТРЯ · Хотянівка", ta_air["dark"])
+label_with_emoji(L+PX, TY+S*2+PY, "🌿", "ЯКІСТЬ ПОВІТРЯ · Дані: SaveEcoBot", ta_air["dark"])
 t_big(L+PX, TY+S*2+58,  f"AQI {aqi_val}", ta_air["dark"])
 t_med(L+PX, TY+S*2+145, air["status"],    ta_air["accent"])
 
