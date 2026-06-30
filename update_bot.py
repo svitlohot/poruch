@@ -65,44 +65,19 @@ def get_power():
 
 def get_air():
     try:
-        key = os.environ.get("GOOGLE_MAPS_KEY", "")
-        url = "https://airquality.googleapis.com/v1/currentConditions:lookup"
-        payload = {
-            "location": {"latitude": 50.5486, "longitude": 30.4197},
-            "languageCode": "uk"
-        }
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(
-            f"{url}?key={key}",
-            json=payload,
-            headers=headers,
-            timeout=5
-        )
-        data = response.json()
+        url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.5486&longitude=30.4197&current=us_aqi"
+        data = requests.get(url, timeout=5).json()
+        aqi = int(data["current"]["us_aqi"])
 
-        aqi_info = next(
-            (i for i in data.get("indexes", []) if i.get("code") == "uaqi"),
-            None
-        )
-        if not aqi_info:
-            raise ValueError("No AQI data")
+        if aqi <= 50:    status = "Добра якість"
+        elif aqi <= 100: status = "Помірна якість"
+        elif aqi <= 150: status = "Шкідливо для чутливих"
+        elif aqi <= 200: status = "Шкідливий рівень"
+        elif aqi <= 300: status = "Дуже шкідливо"
+        else:            status = "Небезпечно"
 
-        aqi = aqi_info.get("aqiDisplay", "—")
-        category = aqi_info.get("category", "")
-
-        translations = {
-            "Excellent air quality": "Чудова якість",
-            "Good air quality": "Хороша якість",
-            "Moderate air quality": "Помірна якість",
-            "Low air quality": "Погана якість",
-            "Poor air quality": "Дуже погано",
-            "Hazardous air quality": "Небезпечно",
-        }
-        status = translations.get(category, category)
-
-        print(f"Air: AQI={aqi}, {status}")
+        print(f"Air: US AQI={aqi}, {status}")
         return {"aqi": aqi, "status": status}
-
     except Exception as e:
         print("Air error:", e)
         return {"aqi": "—", "status": "Помилка"}
