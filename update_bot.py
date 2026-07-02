@@ -474,50 +474,16 @@ ROAD_Y  = TY + S*3
 ROAD_H  = 280
 ROAD_W  = WIDTH - L*2
 
-to_k   = traffic["to"]
-from_k = traffic["from"]
+t = traffic
 
-# Колір блоку
-to_delay   = to_k["delay_min"]
-from_delay = from_k["delay_min"]
-max_delay  = max(to_delay, from_delay)
-
-if max_delay <= 2:    tr_theme = C_GREEN
-elif max_delay <= 10: tr_theme = C_ORANGE
-else:                 tr_theme = C_RED
+if t["time"] == "—":
+    tr_theme = C_TEAL
+else:
+    tr_theme = C_GREEN
 
 draw_card(L, ROAD_Y, ROAD_W, ROAD_H, tr_theme)
-label_with_emoji(L+PX, ROAD_Y+PY, "🚗", "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
+label(L+PX, ROAD_Y+PY, "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
 
-
-# Ліва — З Києва
-t_med(L+PX, ROAD_Y+62,  "З Києва:",        tr_theme["dark"])
-t_big(L+PX,   ROAD_Y+90,  from_k["time"],    tr_theme["dark"])
-t_med(L+PX,   ROAD_Y+175, from_k["delay"],   tr_theme["accent"])
-
-# Права — До Києва
-RX = L + ROAD_W // 2 + 20
-t_med(RX, ROAD_Y+62,  "До Києва:",       tr_theme["dark"])
-t_big(RX,   ROAD_Y+90,  to_k["time"],      tr_theme["dark"])
-t_med(RX,   ROAD_Y+175, to_k["delay"],     tr_theme["accent"])
-
-# Вертикальний розділювач
-MID_X = L + ROAD_W // 2
-draw.rectangle([MID_X, ROAD_Y+50, MID_X+2, ROAD_Y+ROAD_H-30], fill=BORDER)
-
-# ============================================
-# ФУТЕР
-# ============================================
-
-fy = ROAD_Y + ROAD_H + 20
-draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
-t_small(50, fy+14, "Дані оновлюються кожні 10 хв",        SUBTEXT)
-draw.text((50, fy+48), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT, font=f_footer)
-draw.text((960, fy+54), "v1.0", fill="#BBBBBB", font=f_tiny)
-
-# ============================================
-# SAVE
-# ============================================
-
-img.save("status.png")
-print("DONE")
+t_big(L+PX, ROAD_Y+62,  t["time"],  tr_theme["dark"])
+t_med(L+PX, ROAD_Y+150, t["delay"], tr_theme["accent"])
+t_small(L+PX, ROAD_Y+205, "розрахунковий час без пробок", tr_theme["accent"])
