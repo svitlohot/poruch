@@ -487,3 +487,20 @@ label(L+PX, ROAD_Y+PY, "ДОРОГА · м. Героїв Дніпра", tr_theme
 t_big(L+PX, ROAD_Y+62,  t["time"],  tr_theme["dark"])
 t_med(L+PX, ROAD_Y+150, t["delay"], tr_theme["accent"])
 t_small(L+PX, ROAD_Y+205, "розрахунковий час без пробок", tr_theme["accent"])
+
+# ============================================
+# ФУТЕР
+# ============================================
+
+fy = ROAD_Y + ROAD_H + 20
+draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
+t_small(50, fy+14, "Дані оновлюються кожні 10 хв", SUBTEXT)
+draw.text((50, fy+48), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT, font=f_footer)
+draw.text((960, fy+54), "v1.0", fill="#BBBBBB", font=f_tiny)
+
+# ============================================
+# SAVE
+# ============================================
+
+img.save("status.png", optimize=True, compress_level=9)
+print("DONE")
