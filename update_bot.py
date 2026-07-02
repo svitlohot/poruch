@@ -124,42 +124,26 @@ def get_alert():
 def get_traffic():
     try:
         key = os.environ.get("GOOGLE_MAPS_KEY", "")
-        origin = "50.59587618912401,30.56582047829475"
-        dest   = "50.52299641605543,30.498424434465736"
-        # Один запит, два напрямки: origin->dest і dest->origin
         url = (
             "https://maps.googleapis.com/maps/api/distancematrix/json"
-            f"?origins={origin}|{dest}"
-            f"&destinations={dest}|{origin}"
-            f"&mode=driving&departure_time=now&language=uk&key={key}"
+            f"?origins=50.59587618912401,30.56582047829475"
+            f"&destinations=50.52299641605543,30.498424434465736"
+            f"&mode=driving&language=uk&key={key}"
         )
         data = requests.get(url, timeout=5).json()
+        element = data["rows"][0]["elements"][0]
 
-        def parse_leg(row_idx, el_idx, label):
-            el = data["rows"][row_idx]["elements"][el_idx]
-            print(f"Traffic {label} raw: {el}")
-            if el["status"] != "OK":
-                return {"time": "—", "delay": "Немає даних", "delay_min": 0}
-            dur = el["duration_in_traffic"]["value"] // 60
-            dur_n = el["duration"]["value"] // 60
-            delay = dur - dur_n
-            if delay <= 2:    txt = "Вільно"
-            elif delay <= 10: txt = "Помірно"
-            elif delay <= 20: txt = "Затори"
-            else:             txt = "Стоїмо"
-            print(f"Traffic {label}: {dur} хв, {txt}")
-            return {"time": f"{dur} хв", "delay": txt, "delay_min": delay}
+        if element["status"] != "OK":
+            return {"time": "—", "delay": "Немає даних"}
 
-        to_kyiv   = parse_leg(0, 0, "До Києва")
-        from_kyiv = parse_leg(1, 1, "З Києва")
-        return {"to": to_kyiv, "from": from_kyiv}
+        duration = element["duration"]["value"] // 60
+
+        print(f"Traffic: {duration} хв")
+        return {"time": f"{duration} хв", "delay": "без пробок"}
 
     except Exception as e:
         print("Traffic error:", e)
-        return {
-            "to":   {"time": "—", "delay": "Помилка", "delay_min": 0},
-            "from": {"time": "—", "delay": "Помилка", "delay_min": 0},
-        }
+        return {"time": "—", "delay": "Помилка"}
 
 
 def get_weather():
