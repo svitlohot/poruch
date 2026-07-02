@@ -27,6 +27,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/svitlohot/poruch.git
           git pull --rebase
-          git add status.png current_data.json weekly_snapshot.json
+          git add status.png
+          git add current_data.json weekly_snapshot.json 2>/dev/null || true
           git commit -m "Автоматичне оновлення інформера" || exit 0
           git push || git push || git push
