@@ -21,14 +21,12 @@ jobs:
           SVITLO_KEY1: ${{ secrets.SVITLO_KEY1 }}
           SVITLO_KEY2: ${{ secrets.SVITLO_KEY2 }}
           GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
-      - name: Commit and Push changes
+- name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/svitlohot/poruch.git
-          git stash
           git pull --rebase
-          git stash pop
-          git add status.png
+          git add status.png current_data.json weekly_snapshot.json
           git commit -m "Автоматичне оновлення інформера" || exit 0
-          git push
+          git push || git push || git push
