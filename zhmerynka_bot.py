@@ -70,7 +70,7 @@ def get_fuel():
 
 def get_air():
     try:
-        url = "https://www.saveecobot.com/city/vinnytsia.json"
+        url = "https://www.saveecobot.com/en/maps/vinnytsia.json"
         headers = {"User-Agent": "Mozilla/5.0"}
         resp = requests.get(url, headers=headers, timeout=10)
         print("Air raw response:", resp.text[:200])
@@ -132,11 +132,9 @@ def get_geomagnetic():
         print("Geomagnetic raw last rows:", data[-3:])
 
         # Останній запис — поточний Kp
-        # Формат: [time, Kp, ...], перший рядок - заголовки
+        # Формат: список словників {"time_tag":..., "Kp":..., ...}
         last = data[-1]
-        kp_raw = str(last[1]).strip()
-        kp_clean = "".join(c for c in kp_raw if c.isdigit() or c == ".")
-        kp = float(kp_clean) if kp_clean else 0.0
+        kp = float(last["Kp"])
 
         if kp < 4:
             status = "Спокійно"
