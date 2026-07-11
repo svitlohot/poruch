@@ -1,0 +1,31 @@
+name: Zhmerynka status
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests pillow beautifulsoup4
+      - name: Run script
+        run: python zhmerynka_bot.py
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/svitlohot/poruch.git
+          git stash
+          git pull --rebase
+          git stash pop || true
+          git add zhmerynka.png
+          git add current_data.json weekly_snapshot.json 2>/dev/null || true
+          git commit -m "Автоматичне оновлення інформера для Жмеринки" || exit 0
+          git push || git push || git push
