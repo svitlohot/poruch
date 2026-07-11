@@ -92,8 +92,8 @@ def get_air():
 
 
 def get_weather():
+    """Погода + попередження від УкрГМЦ для Вінницької обл."""
     try:
-        # Координати Жмеринки
         url = (
             "https://api.open-meteo.com/v1/forecast"
             "?latitude=49.0356&longitude=28.1138"
@@ -119,10 +119,42 @@ def get_weather():
 
         desc = wmo_desc(code)
         print(f"Weather: {temp}°, {desc}, вітер {wind} м/с")
-        return {"temp": temp, "desc": desc, "wind": wind}
+
+        warning = None
+        warning_level = None
+        try:
+            from bs4 import BeautifulSoup
+            w_url = "https://www.meteo.gov.ua/ua/Meteorolohichni-poperedzhennya"
+            html = requests.get(w_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10).text
+            soup = BeautifulSoup(html, "html.parser")
+
+            headers_h5 = soup.find_all("h5")
+            for h in headers_h5:
+                text = h.text.strip()
+                keywords = ["Вінницьк", "всі област", "по всій", "центральних", "Україні"]
+                if any(k in text for k in keywords):
+                    warning = text
+                    if "III рівень" in text or "червоний" in text:
+                        warning_level = "III"
+                    elif "II рівень" in text or "оранжевий" in text:
+                        warning_level = "II"
+                    elif "I рівень" in text or "жовтий" in text:
+                        warning_level = "I"
+                    break
+            print(f"Warning: {warning_level} - {warning[:60] if warning else 'немає'}")
+        except Exception as e:
+            print("Warning parse error:", e)
+
+        return {
+            "temp": temp,
+            "desc": desc,
+            "wind": wind,
+            "warning": warning,
+            "warning_level": warning_level,
+        }
     except Exception as e:
         print("Weather error:", e)
-        return {"temp": "—", "desc": "Помилка", "wind": 0}
+        return {"temp": "—", "desc": "Помилка", "wind": 0, "warning": None, "warning_level": None}
 
 
 def get_geomagnetic():
@@ -309,15 +341,65 @@ t_med(L+PX, TY+S+145, air["status"],    ta_air["accent"])
 t_small(L+PX, TY+S+200, "Дані: SaveEcoBot", ta_air["accent"])
 
 # ============================================
-# 4. ПОГОДА
+# 4. ПОГОДА / ПОПЕРЕДЖЕННЯ
 # ============================================
 
-draw_card(R, TY+S, CW, CH, C_TEAL)
-label_with_emoji(R+PX, TY+S+PY, "🌤", "ПОГОДА · Жмеринка", C_TEAL["dark"])
-t_big(R+PX, TY+S+58,  f"+{weather['temp']}°", C_TEAL["dark"])
-t_med(R+PX, TY+S+145, weather["desc"],         C_TEAL["accent"])
-if weather["wind"] > 0:
-    t_small(R+PX, TY+S+200, f"Вітер {weather['wind']} м/с", C_TEAL["accent"])
+w = weather
+if w["warning"] and w["warning_level"]:
+    import re
+
+    warn_text = w["warning"]
+
+    date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
+    if date_match:
+        parts = date_match.group(1).split()
+        months = {"січня":"01","лютого":"02","березня":"03","квітня":"04",
+                  "травня":"05","червня":"06","липня":"07","серпня":"08",
+                  "вересня":"09","жовтня":"10","листопада":"11","грудня":"12"}
+        m = months.get(parts[1], "??") if len(parts) == 2 else "??"
+        date_str = f"· {parts[0]}.{m}."
+    else:
+        date_str = ""
+
+    for keyword in ["областях ", "районах "]:
+        idx = warn_text.rfind(keyword)
+        if idx != -1:
+            warn_text = warn_text[idx + len(keyword):]
+            break
+
+    warn_text = re.sub(r'\([^)]*рівень[^)]*\)', '', warn_text).strip().rstrip(".")
+
+    words = warn_text.split()
+    lines = []
+    current = ""
+    for word in words:
+        if len((current + " " + word).strip()) <= 38:
+            current = (current + " " + word).strip()
+        else:
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+
+    level_colors = {"I": C_YELLOW, "II": C_ORANGE, "III": C_RED}
+    tw = level_colors.get(w["warning_level"], C_YELLOW)
+
+    draw_card(R, TY+S, CW, CH, tw)
+    label_with_emoji(R+PX, TY+S+PY, "⛈", f"ПОПЕРЕДЖЕННЯ · {w['warning_level']} рівень {date_str}", tw["dark"])
+
+    for i, line in enumerate(lines[:3]):
+        t_small(R+PX, TY+S+58 + i*34, line, tw["dark"])
+
+    if w["wind"] > 0:
+        t_med(R+PX, TY+S+175, f"Вітер {w['wind']} м/с", tw["dark"])
+
+else:
+    draw_card(R, TY+S, CW, CH, C_TEAL)
+    label_with_emoji(R+PX, TY+S+PY, "🌤", "ПОГОДА · Жмеринка", C_TEAL["dark"])
+    t_big(R+PX, TY+S+58,  f"+{w['temp']}°", C_TEAL["dark"])
+    t_med(R+PX, TY+S+145, w["desc"],         C_TEAL["accent"])
+    if w["wind"] > 0:
+        t_small(R+PX, TY+S+200, f"Вітер {w['wind']} м/с", C_TEAL["accent"])
 
 # ============================================
 # 5. ГЕОМАГНІТНА ОБСТАНОВКА (повна ширина)
