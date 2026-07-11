@@ -26,6 +26,5 @@ jobs:
           git pull --rebase
           git stash pop || true
           git add zhmerynka.png
-          git add current_data.json weekly_snapshot.json 2>/dev/null || true
           git commit -m "Автоматичне оновлення інформера для Жмеринки" || exit 0
           git push || git push || git push
