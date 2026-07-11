@@ -348,7 +348,3 @@ draw.text((960, fy+54), "v1.0", fill="#BBBBBB", font=f_tiny)
 
 img.save("zhmerynka.png", optimize=True, compress_level=9)
 print("DONE")
-ENDOFFILE
-Output
-
-exit code 0
