@@ -72,7 +72,9 @@ def get_air():
     try:
         url = "https://www.saveecobot.com/city/vinnytsia.json"
         headers = {"User-Agent": "Mozilla/5.0"}
-        data = requests.get(url, headers=headers, timeout=10).json()
+        resp = requests.get(url, headers=headers, timeout=10)
+        print("Air raw response:", resp.text[:200])
+        data = resp.json()
         aqi = int(data["aqi"])
 
         if aqi <= 50:    status = "Добра якість"
@@ -127,12 +129,14 @@ def get_geomagnetic():
     try:
         url = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
         data = requests.get(url, timeout=5).json()
+        print("Geomagnetic raw last rows:", data[-3:])
 
         # Останній запис — поточний Kp
-        # Формат: [time, Kp, ...]
+        # Формат: [time, Kp, ...], перший рядок - заголовки
         last = data[-1]
-        kp = float(last[1])
-        kp_int = int(kp)
+        kp_raw = str(last[1]).strip()
+        kp_clean = "".join(c for c in kp_raw if c.isdigit() or c == ".")
+        kp = float(kp_clean) if kp_clean else 0.0
 
         if kp < 4:
             status = "Спокійно"
