@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: pip install requests pillow beautifulsoup4
       - name: Run script
-        run: python update_bot.py zhmerynka_bot.py
+        run: python update_bot.py
         env:
           SVITLO_KEY1: ${{ secrets.SVITLO_KEY1 }}
           SVITLO_KEY2: ${{ secrets.SVITLO_KEY2 }}
@@ -30,7 +30,6 @@ jobs:
           git pull --rebase
           git stash pop || true
           git add status.png
-          git add zhmerynka.png
           git add current_data.json weekly_snapshot.json 2>/dev/null || true
           git commit -m "Автоматичне оновлення інформера" || exit 0
           git push || git push || git push
