@@ -137,25 +137,25 @@ def get_geomagnetic():
         kp = float(last["Kp"])
 
         if kp < 4:
-            status = "Спокійно"
+            status = "Невеликі збурення"
             theme = C_GREEN
         elif kp < 5:
-            status = "Підвищена активність"
-            theme = C_YELLOW
+            status = "Невеликі збурення"
+            theme = C_GREEN
         elif kp < 6:
-            status = "Буря G1"
-            theme = C_ORANGE
+            status = "Слабка буря"
+            theme = C_YELLOW
         elif kp < 7:
-            status = "Буря G2"
+            status = "Помірна буря"
             theme = C_ORANGE
         elif kp < 8:
-            status = "Буря G3"
-            theme = C_RED
+            status = "Сильна буря"
+            theme = C_ORANGE
         elif kp < 9:
-            status = "Буря G4"
+            status = "Шторм"
             theme = C_RED
         else:
-            status = "Буря G5 (екстремальна)"
+            status = "Екстремальний шторм"
             theme = C_RED
 
         print(f"Geomagnetic: Kp={kp}, {status}")
