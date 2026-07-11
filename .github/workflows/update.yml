@@ -29,7 +29,8 @@ jobs:
           git stash
           git pull --rebase
           git stash pop || true
-          git add status.png zhmerynka.png
+          git add status.png
+          git add zhmerynka.png
           git add current_data.json weekly_snapshot.json 2>/dev/null || true
           git commit -m "Автоматичне оновлення інформера" || exit 0
           git push || git push || git push
