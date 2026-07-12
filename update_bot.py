@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # ============================================
 
 WIDTH  = 1080
-HEIGHT = 1620  # збільшили для блоку дороги
+HEIGHT = 1620
 
 BG      = "#F5F1E8"
 WHITE   = "#FFFFFF"
@@ -68,7 +68,6 @@ def get_air():
         url = "https://www.saveecobot.com/station/24765.json"
         headers = {"User-Agent": "Mozilla/5.0"}
         data = requests.get(url, headers=headers, timeout=10).json()
-
         aqi = int(data["aqi"])
 
         if aqi <= 50:    status = "Добра якість"
@@ -80,10 +79,10 @@ def get_air():
 
         print(f"Air (SaveEcoBot): AQI={aqi}, {status}")
         return {"aqi": aqi, "status": status}
-
     except Exception as e:
         print("Air error:", e)
         return {"aqi": "—", "status": "Помилка"}
+
 
 def get_fuel():
     try:
@@ -137,10 +136,8 @@ def get_traffic():
             return {"time": "—", "delay": "Немає даних"}
 
         duration = element["duration"]["value"] // 60
-
         print(f"Traffic: {duration} хв")
         return {"time": f"{duration} хв", "delay": "без пробок"}
-
     except Exception as e:
         print("Traffic error:", e)
         return {"time": "—", "delay": "Помилка"}
@@ -149,7 +146,6 @@ def get_traffic():
 def get_weather():
     """Погода + попередження від УкрГМЦ для Київської обл."""
     try:
-        # Поточна погода через Open-Meteo
         url = (
             "https://api.open-meteo.com/v1/forecast"
             "?latitude=50.5486&longitude=30.4197"
@@ -161,7 +157,6 @@ def get_weather():
         code = data["current"]["weathercode"]
         wind = round(data["current"]["windspeed_10m"])
 
-        # WMO weather code -> опис
         def wmo_desc(c):
             if c == 0:            return "Ясно"
             elif c <= 2:          return "Малохмарно"
@@ -177,7 +172,6 @@ def get_weather():
         desc = wmo_desc(code)
         print(f"Weather: {temp}°, {desc}, вітер {wind} м/с")
 
-        # Попередження від УкрГМЦ
         warning = None
         warning_level = None
         try:
@@ -186,14 +180,12 @@ def get_weather():
             html = requests.get(w_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10).text
             soup = BeautifulSoup(html, "html.parser")
 
-            # Шукаємо всі h5 з попередженнями
             headers_h5 = soup.find_all("h5")
             for h in headers_h5:
                 text = h.text.strip()
                 keywords = ["Київськ", "всі област", "по всій", "центральних", "Україні"]
                 if any(k in text for k in keywords):
                     warning = text
-                    # Визначаємо рівень
                     if "III рівень" in text or "червоний" in text:
                         warning_level = "III"
                     elif "II рівень" in text or "оранжевий" in text:
@@ -212,10 +204,47 @@ def get_weather():
             "warning": warning,
             "warning_level": warning_level,
         }
-
     except Exception as e:
         print("Weather error:", e)
         return {"temp": "—", "desc": "Помилка", "wind": 0, "warning": None, "warning_level": None}
+
+
+def get_geomagnetic_forecast():
+    """Максимальний прогнозований Kp на завтра (NOAA 3-day forecast)"""
+    try:
+        url = "https://services.swpc.noaa.gov/text/3-day-forecast.txt"
+        text = requests.get(url, timeout=10).text
+        import re
+        match = re.search(r"NOAA Kp index breakdown.*?\n(.*?)\n\n", text, re.DOTALL)
+        block = match.group(1) if match else ""
+        lines = block.strip().split("\n")
+
+        max_tomorrow = 0.0
+        for line in lines[1:]:
+            parts = line.split()
+            nums = []
+            for token in parts[1:]:
+                try:
+                    nums.append(float(token))
+                except ValueError:
+                    pass
+            if len(nums) >= 2 and nums[1] > max_tomorrow:
+                max_tomorrow = nums[1]
+
+        print(f"Forecast tomorrow max Kp: {max_tomorrow}")
+        return max_tomorrow
+    except Exception as e:
+        print("Forecast error:", e)
+        return None
+
+
+def kp_status(kp):
+    if kp < 5: return "Невеликі збурення", C_GREEN
+    if kp < 6: return "Слабка буря", C_YELLOW
+    if kp < 7: return "Помірна буря", C_ORANGE
+    if kp < 8: return "Сильна буря", C_ORANGE
+    if kp < 9: return "Шторм", C_RED
+    return "Екстремальний шторм", C_RED
 
 
 # ============================================
@@ -240,7 +269,6 @@ except:
 
 try:
     f_emoji_label = ImageFont.truetype(EMOJI_PATH, 24)
-    f_emoji_big   = ImageFont.truetype(EMOJI_PATH, 48)
     has_emoji = True
 except:
     has_emoji = False
@@ -279,15 +307,15 @@ draw.text((820, 95),  now.strftime("%H:%M"),    fill=TEXT,    font=f_time)
 draw.rectangle([0, HEADER_H, WIDTH, HEADER_H+3], fill=BORDER)
 
 # ============================================
-# СІТКА
+# ДОПОМІЖНІ ФУНКЦІЇ
 # ============================================
 
 L   = 38
 R   = 558
 TY  = HEADER_H + 22
-S   = 286       # крок між рядками карток
-CW  = 482       # ширина малої картки
-CH  = 258       # висота малої картки
+S   = 286
+CW  = 482
+CH  = 258
 PX  = 26
 PY  = 18
 
@@ -296,9 +324,6 @@ def draw_card(x, y, w, h, theme):
 
 def draw_dot(x, y, color):
     draw.ellipse([x-10, y-10, x+10, y+10], fill=color)
-
-def label(x, y, text, color, font=None):
-    draw.text((x, y), text, fill=color, font=font or f_label)
 
 def label_with_emoji(x, y, emoji, text, color):
     if has_emoji:
@@ -328,6 +353,7 @@ alert    = get_alert()
 power    = get_power()
 traffic  = get_traffic()
 weather  = get_weather()
+geo_forecast = get_geomagnetic_forecast()
 
 # ============================================
 # 1. СВІТЛО
@@ -402,15 +428,15 @@ t_big(L+PX, TY+S*2+58,  f"AQI {aqi_val}", ta_air["dark"])
 t_med(L+PX, TY+S*2+145, air["status"],    ta_air["accent"])
 
 # ============================================
-# 6. ПОГОДА / ПОПЕРЕДЖЕННЯ
+# 6. ПОГОДА / ПОПЕРЕДЖЕННЯ / ГЕОМАГНІТНА БУРЯ
 # ============================================
 w = weather
+
 if w["warning"] and w["warning_level"]:
     import re
 
     warn_text = w["warning"]
 
-    # Витягуємо дату з оригінального тексту
     date_match = re.search(r'(\d{1,2}\s+\w+)', warn_text)
     if date_match:
         parts = date_match.group(1).split()
@@ -422,17 +448,14 @@ if w["warning"] and w["warning_level"]:
     else:
         date_str = ""
 
-    # Витягуємо тільки явище після "областях" або "районах"
     for keyword in ["областях ", "районах "]:
         idx = warn_text.rfind(keyword)
         if idx != -1:
             warn_text = warn_text[idx + len(keyword):]
             break
 
-    # Видаляємо дужки з рівнем небезпечності
     warn_text = re.sub(r'\([^)]*рівень[^)]*\)', '', warn_text).strip().rstrip(".")
 
-    # Розбиваємо по словах на рядки до 38 символів
     words = warn_text.split()
     lines = []
     current = ""
@@ -457,8 +480,16 @@ if w["warning"] and w["warning_level"]:
     if w["wind"] > 0:
         t_med(R+PX, TY+S*2+175, f"Вітер {w['wind']} м/с", tw["dark"])
 
+elif geo_forecast is not None and geo_forecast >= 5:
+    f_status, f_theme = kp_status(geo_forecast)
+
+    draw_card(R, TY+S*2, CW, CH, f_theme)
+    label_with_emoji(R+PX, TY+S*2+PY, "🧲", "ГЕОМАГНІТНА БУРЯ", f_theme["dark"])
+    t_big(R+PX, TY+S*2+58,  f"Завтра Kp {geo_forecast:.0f}", f_theme["dark"])
+    t_med(R+PX, TY+S*2+145, f_status,                         f_theme["accent"])
+    t_small(R+PX, TY+S*2+200, "Прогноз: NOAA SWPC", f_theme["accent"])
+
 else:
-    # Звичайна погода
     draw_card(R, TY+S*2, CW, CH, C_TEAL)
     label_with_emoji(R+PX, TY+S*2+PY, "🌤", "ПОГОДА · Хотянівка", C_TEAL["dark"])
     t_big(R+PX, TY+S*2+58,  f"+{w['temp']}°", C_TEAL["dark"])
@@ -482,7 +513,7 @@ else:
     tr_theme = C_GREEN
 
 draw_card(L, ROAD_Y, ROAD_W, ROAD_H, tr_theme)
-label(L+PX, ROAD_Y+PY, "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
+label_with_emoji(L+PX, ROAD_Y+PY, "🚗", "ДОРОГА · м. Героїв Дніпра", tr_theme["dark"])
 
 t_big(L+PX, ROAD_Y+62,  t["time"],  tr_theme["dark"])
 t_med(L+PX, ROAD_Y+150, t["delay"], tr_theme["accent"])
@@ -496,7 +527,7 @@ fy = ROAD_Y + ROAD_H + 20
 draw.rectangle([38, fy, WIDTH-38, fy+2], fill=BORDER)
 t_small(50, fy+14, "Дані оновлюються кожні 10 хв", SUBTEXT)
 draw.text((50, fy+48), "Поруч | Хотянівка  •  @poruch_ua_bot", fill=TEXT, font=f_footer)
-draw.text((960, fy+54), "v1.0", fill="#BBBBBB", font=f_tiny)
+draw.text((960, fy+54), "v1.1", fill="#BBBBBB", font=f_tiny)
 
 # ============================================
 # SAVE
