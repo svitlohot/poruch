@@ -27,4 +27,4 @@ jobs:
           git stash pop || true
           git add zhmerynka.png
           git commit -m "Автоматичне оновлення інформера для Жмеринки" || exit 0
-          git push || git push || git push
+          git push || (git pull --rebase && git push) || (git pull --rebase && git push)
