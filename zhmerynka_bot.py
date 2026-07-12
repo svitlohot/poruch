@@ -197,6 +197,44 @@ def get_geomagnetic():
         return {"kp": "—", "status": "Помилка", "theme": C_TEAL}
 
 
+def get_geomagnetic_forecast():
+    """Максимальний прогнозований Kp на завтра (NOAA 3-day forecast)"""
+    try:
+        url = "https://services.swpc.noaa.gov/text/3-day-forecast.txt"
+        text = requests.get(url, timeout=10).text
+        import re
+        match = re.search(r"NOAA Kp index breakdown.*?\n(.*?)\n\n", text, re.DOTALL)
+        block = match.group(1) if match else ""
+        lines = block.strip().split("\n")
+
+        max_tomorrow = 0.0
+        for line in lines[1:]:
+            parts = line.split()
+            nums = []
+            for token in parts[1:]:
+                try:
+                    nums.append(float(token))
+                except ValueError:
+                    pass
+            if len(nums) >= 2 and nums[1] > max_tomorrow:
+                max_tomorrow = nums[1]
+
+        print(f"Forecast tomorrow max Kp: {max_tomorrow}")
+        return max_tomorrow
+    except Exception as e:
+        print("Forecast error:", e)
+        return None
+
+
+def kp_status(kp):
+    if kp < 5: return "Невеликі збурення", C_GREEN
+    if kp < 6: return "Слабка буря", C_YELLOW
+    if kp < 7: return "Помірна буря", C_ORANGE
+    if kp < 8: return "Сильна буря", C_ORANGE
+    if kp < 9: return "Шторм", C_RED
+    return "Екстремальний шторм", C_RED
+
+
 # ============================================
 # ШРИФТИ
 # ============================================
@@ -300,6 +338,7 @@ fuel   = get_fuel()
 air    = get_air()
 weather = get_weather()
 geo    = get_geomagnetic()
+geo_forecast = get_geomagnetic_forecast()
 
 # ============================================
 # 1. ТРИВОГА
@@ -406,7 +445,7 @@ else:
 # ============================================
 
 GEO_Y = TY + S*2
-GEO_H = 280
+GEO_H = 320
 GEO_W = WIDTH - L*2
 gt = geo["theme"]
 
@@ -414,7 +453,14 @@ draw_card(L, GEO_Y, GEO_W, GEO_H, gt)
 label_with_emoji(L+PX, GEO_Y+PY, "🧲", "ГЕОМАГНІТНА ОБСТАНОВКА · Kp-індекс", gt["dark"])
 t_big(L+PX, GEO_Y+62,  f"Kp {geo['kp']}", gt["dark"])
 t_med(L+PX, GEO_Y+148, geo["status"],      gt["accent"])
-t_small(L+PX, GEO_Y+210, "Дані: NOAA Space Weather Prediction Center", gt["accent"])
+
+if geo_forecast is not None and geo_forecast >= 5:
+    f_status, f_theme = kp_status(geo_forecast)
+    draw_dot(L+PX+10, GEO_Y+200, f_theme["accent"])
+    t_small(L+PX+28, GEO_Y+188, f"Завтра можлива буря: до Kp {geo_forecast:.0f} ({f_status})", gt["dark"])
+    t_small(L+PX, GEO_Y+250, "Дані: NOAA Space Weather Prediction Center", gt["accent"])
+else:
+    t_small(L+PX, GEO_Y+250, "Дані: NOAA Space Weather Prediction Center", gt["accent"])
 
 # ============================================
 # ФУТЕР
